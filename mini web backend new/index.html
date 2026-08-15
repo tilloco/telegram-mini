@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Law Quiz</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --tg-theme-bg-color: #ffffff;
+    --tg-theme-text-color: #1a1a1a;
+    --tg-theme-button-color: #2481cc;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-hint-color: #999999;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    padding: 16px;
+  }
+  h1 { font-size: 20px; margin: 0 0 16px; }
+  .card {
+    background: rgba(0,0,0,0.03);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .card:active { background: rgba(0,0,0,0.08); }
+  .card-title { font-size: 16px; font-weight: 600; margin: 0; }
+  .card-sub { font-size: 13px; color: var(--tg-theme-hint-color); margin-top: 4px; }
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+  }
+  .btn:disabled { opacity: 0.5; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px;
+    background: rgba(0,0,0,0.03);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .option.correct { border-color: #2ecc71; background: rgba(46,204,113,0.1); }
+  .option.wrong { border-color: #e74c3c; background: rgba(231,76,60,0.1); }
+  .back { color: var(--tg-theme-button-color); margin-bottom: 12px; cursor: pointer; display: inline-block; }
+  .center { text-align: center; padding: 40px 0; color: var(--tg-theme-hint-color); }
+  .paywall { text-align: center; padding: 30px 16px; }
+</style>
+</head>
+<body>
+
+<div id="app"><div class="center">Loading...</div></div>
+
+<script>
+// ---- CONFIG: change this to your deployed backend URL ----
+const API_BASE = "https://telegram-mini-3clz.onrender.com"; // TODO: replace with your Render backend URL before going live
+// ------------------------------------------------------------
+
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+let sessionToken = null;
+let state = { view: "loading" };
+
+async function api(path, options = {}) {
+  const headers = options.headers || {};
+  if (sessionToken) headers["Authorization"] = `Bearer ${sessionToken}`;
+  if (options.body) headers["Content-Type"] = "application/json";
+  const res = await fetch(API_BASE + path, { ...options, headers });
+  if (res.status === 402) { state = { view: "paywall" }; render(); throw new Error("paywall"); }
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.json();
+}
+
+async function login() {
+  const initData = tg?.initData || "";
+  if (!initData) {
+    // Not opened inside real Telegram — show a helpful message instead of failing silently
+    state = { view: "no_telegram" };
+    render();
+    return;
+  }
+  const data = await api("/auth/telegram", {
+    method: "POST",
+    body: JSON.stringify({ init_data: initData }),
+  });
+  sessionToken = data.token;
+  loadSubjects();
+}
+
+async function loadSubjects() {
+  state = { view: "loading" };
+  render();
+  const subjects = await api("/content/subjects");
+  state = { view: "subjects", subjects };
+  render();
+}
+
+async function openSubject(subject) {
+  state = { view: "loading" };
+  render();
+  const modules = await api(`/content/subjects/${subject.id}/modules`);
+  state = { view: "modules", subject, modules };
+  render();
+}
+
+async function openModule(subject, module) {
+  state = { view: "loading" };
+  render();
+  const questions = await api(`/quiz/modules/${module.id}/questions`);
+  state = { view: "quiz", subject, module, questions, index: 0, correctCount: 0, answered: null };
+  render();
+}
+
+async function answer(selected) {
+  if (state.answered) return; // already answered this question
+  try {
+    const q = state.questions[state.index];
+    const result = await api("/quiz/answer", {
+      method: "POST",
+      body: JSON.stringify({ question_id: q.id, selected_option: selected }),
+    });
+    state.answered = { selected, ...result };
+    if (result.correct) state.correctCount++;
+    render();
+  } catch (e) {
+    if (e.message !== "paywall") console.error(e);
+  }
+}
+
+function nextQuestion() {
+  if (state.index + 1 >= state.questions.length) {
+    state.view = "done";
+  } else {
+    state.index++;
+    state.answered = null;
+  }
+  render();
+}
+
+function render() {
+  const app = document.getElementById("app");
+
+  if (state.view === "loading") {
+    app.innerHTML = `<div class="center">Loading...</div>`;
+    return;
+  }
+
+  if (state.view === "no_telegram") {
+    app.innerHTML = `
+      <div class="center">
+        Please open this app from your Telegram bot's menu button — it needs to run inside Telegram to log you in.
+      </div>`;
+    return;
+  }
+
+  if (state.view === "paywall") {
+    app.innerHTML = `
+      <div class="paywall">
+        <h1>Bugungi bepul savollar tugadi</h1>
+        <p>Cheksiz kirish uchun to'lovni amalga oshiring.</p>
+        <button class="btn" onclick="window.location.reload()">Orqaga</button>
+      </div>`;
+    return;
+  }
+
+  if (state.view === "subjects") {
+    app.innerHTML = `
+      <h1>Fanlar</h1>
+      ${state.subjects.map(s => `
+        <div class="card" onclick='openSubject(${JSON.stringify(s)})'>
+          <p class="card-title">${s.title}</p>
+        </div>
+      `).join("") || `<div class="center">Hozircha fanlar yo'q</div>`}
+    `;
+    return;
+  }
+
+  if (state.view === "modules") {
+    app.innerHTML = `
+      <span class="back" onclick="loadSubjects()">&larr; Orqaga</span>
+      <h1>${state.subject.title}</h1>
+      ${state.modules.map(m => `
+        <div class="card" onclick='openModule(${JSON.stringify(state.subject)}, ${JSON.stringify(m)})'>
+          <p class="card-title">Modul ${m.label}</p>
+        </div>
+      `).join("") || `<div class="center">Hozircha modullar yo'q</div>`}
+    `;
+    return;
+  }
+
+  if (state.view === "quiz") {
+    const q = state.questions[state.index];
+    if (!q) { app.innerHTML = `<div class="center">Bu modulda savollar yo'q</div>`; return; }
+    const a = state.answered;
+    const optKey = (k) => a ? (k === a.correct_option ? "correct" : (k === a.selected ? "wrong" : "")) : "";
+    app.innerHTML = `
+      <span class="back" onclick='openSubject(${JSON.stringify(state.subject)})'>&larr; Orqaga</span>
+      <div class="card-sub">Savol ${state.index + 1} / ${state.questions.length}</div>
+      <h1>${q.text}</h1>
+      <button class="option ${optKey('a')}" onclick="answer('a')">${q.option_a}</button>
+      <button class="option ${optKey('b')}" onclick="answer('b')">${q.option_b}</button>
+      <button class="option ${optKey('c')}" onclick="answer('c')">${q.option_c}</button>
+      <button class="option ${optKey('d')}" onclick="answer('d')">${q.option_d}</button>
+      ${a ? `<button class="btn" onclick="nextQuestion()">Keyingisi</button>` : ""}
+    `;
+    return;
+  }
+
+  if (state.view === "done") {
+    app.innerHTML = `
+      <div class="center">
+        <h1>Tugadi!</h1>
+        <p>${state.correctCount} / ${state.questions.length} to'g'ri javob</p>
+        <button class="btn" onclick='openSubject(${JSON.stringify(state.subject)})'>Modullarga qaytish</button>
+      </div>`;
+    return;
+  }
+}
+
+login();
+</script>
+</body>
+</html>
