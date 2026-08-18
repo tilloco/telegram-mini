@@ -2,81 +2,367 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Law Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#10182B">
+<title>Huquq Testlar</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --tg-theme-bg-color: #ffffff;
-    --tg-theme-text-color: #1a1a1a;
-    --tg-theme-button-color: #2481cc;
-    --tg-theme-button-text-color: #ffffff;
-    --tg-theme-hint-color: #999999;
+    --ink: #10182B;
+    --ink-2: #182238;
+    --ink-line: #2A3654;
+    --paper: #F7F2E7;
+    --paper-2: #EDE4D0;
+    --paper-line: #DCD0B4;
+    --gold: #C9A227;
+    --gold-deep: #A2801C;
+    --maroon: #9A3B45;
+    --sage: #4C7A5C;
+    --text: #EEEAE0;
+    --text-dim: #9AA3C0;
+    --text-ink: #221D14;
+    --text-ink-dim: #6E6552;
+    --radius: 14px;
   }
-  * { box-sizing: border-box; }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overscroll-behavior-y: none;
+  }
+
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    padding: 16px;
+    min-height: 100dvh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--ink);
+    background-image:
+      radial-gradient(ellipse 600px 300px at 50% -10%, rgba(201,162,39,0.10), transparent),
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    color: var(--text);
+    padding: 18px 16px calc(28px + env(safe-area-inset-bottom));
   }
-  h1 { font-size: 20px; margin: 0 0 16px; }
-  .card {
-    background: rgba(0,0,0,0.03);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
+
+  #app { max-width: 480px; margin: 0 auto; }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .seal-mono {
+    width: 42px; height: 42px; flex: none;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Spectral', serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+  .eyebrow {
+    margin: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 1.6px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .brand {
+    margin: 2px 0 0;
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  h1.page-title {
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0 0 18px;
+  }
+
+  /* ---------- Rows (subjects / modules) ---------- */
+  .row-list { display: flex; flex-direction: column; }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--ink-line);
+    padding: 15px 2px;
     cursor: pointer;
-    transition: background 0.15s;
+    font: inherit;
+    color: inherit;
+    transition: opacity 0.15s;
   }
-  .card:active { background: rgba(0,0,0,0.08); }
-  .card-title { font-size: 16px; font-weight: 600; margin: 0; }
-  .card-sub { font-size: 13px; color: var(--tg-theme-hint-color); margin-top: 4px; }
+  .row:active { opacity: 0.55; }
+  .row:last-child { border-bottom: none; }
+  .tag {
+    flex: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    border: 1px solid rgba(201,162,39,0.4);
+    border-radius: 7px;
+    padding: 5px 8px;
+    min-width: 40px;
+    text-align: center;
+  }
+  .row-body { flex: 1; min-width: 0; }
+  .row-title {
+    display: block;
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+  }
+  .row-hint {
+    display: block;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .chev { flex: none; color: var(--text-dim); font-size: 18px; }
+
+  /* ---------- Buttons ---------- */
   .btn {
     display: block;
     width: 100%;
-    padding: 14px;
-    background: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
+    padding: 15px;
+    background: var(--gold);
+    color: #1A1305;
     border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
+    border-radius: 11px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15.5px;
+    font-weight: 700;
     cursor: pointer;
-    margin-top: 12px;
+    margin-top: 14px;
+    transition: transform 0.1s, opacity 0.15s;
   }
-  .btn:disabled { opacity: 0.5; }
+  .btn:active { transform: scale(0.98); opacity: 0.9; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--ink-line);
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    font-size: 13.5px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  .back:active { opacity: 0.6; }
+
+  /* ---------- Quiz ---------- */
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .quiz-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .progress-track {
+    height: 3px;
+    background: var(--ink-line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.3s ease;
+  }
+  .quiz-question {
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 19px;
+    line-height: 1.4;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+
   .option {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     width: 100%;
     text-align: left;
     padding: 14px;
-    background: rgba(0,0,0,0.03);
-    border: 2px solid transparent;
-    border-radius: 10px;
-    font-size: 15px;
+    background: var(--paper);
+    border: 1.5px solid var(--paper-line);
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    color: var(--text-ink);
     margin-bottom: 10px;
     cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
   }
-  .option.correct { border-color: #2ecc71; background: rgba(46,204,113,0.1); }
-  .option.wrong { border-color: #e74c3c; background: rgba(231,76,60,0.1); }
-  .back { color: var(--tg-theme-button-color); margin-bottom: 12px; cursor: pointer; display: inline-block; }
-  .center { text-align: center; padding: 40px 0; color: var(--tg-theme-hint-color); }
-  .paywall { text-align: center; padding: 30px 16px; }
+  .option:active { opacity: 0.85; }
+  .option-badge {
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--paper-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-ink-dim);
+  }
+  .option.correct {
+    border-color: var(--sage);
+    background: rgba(76,122,92,0.14);
+  }
+  .option.correct .option-badge { background: var(--sage); color: #fff; }
+  .option.wrong {
+    border-color: var(--maroon);
+    background: rgba(154,59,69,0.14);
+  }
+  .option.wrong .option-badge { background: var(--maroon); color: #fff; }
+
+  /* ---------- States: loading / empty / no-telegram ---------- */
+  .skeleton-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px 2px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .skeleton-bar {
+    background: linear-gradient(90deg, var(--ink-2) 25%, var(--ink-line) 37%, var(--ink-2) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 6px;
+  }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+  .notice {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-dim);
+  }
+  .notice .seal-mono { margin: 0 auto 16px; width: 48px; height: 48px; font-size: 18px; }
+  .notice p { font-size: 14px; line-height: 1.6; margin: 0; }
+  .notice .lead {
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  /* ---------- Paywall ---------- */
+  .paywall-card {
+    text-align: center;
+    padding: 34px 22px;
+    background: var(--paper);
+    border-radius: 16px;
+    color: var(--text-ink);
+  }
+  .paywall-card .seal-mono {
+    margin: 0 auto 16px;
+    width: 50px; height: 50px;
+    border-color: var(--gold-deep);
+    color: var(--gold-deep);
+    font-size: 18px;
+  }
+  .paywall-card h1 {
+    font-family: 'Spectral', serif;
+    font-size: 19px;
+    margin: 0 0 8px;
+  }
+  .paywall-card p {
+    font-size: 13.5px;
+    color: var(--text-ink-dim);
+    line-height: 1.6;
+    margin: 0 0 4px;
+  }
+  .paywall-note {
+    font-size: 11.5px;
+    color: var(--text-ink-dim);
+    margin-top: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ---------- Done screen ---------- */
+  .done-wrap { text-align: center; padding: 30px 10px; }
+  .done-seal {
+    width: 74px; height: 74px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    color: var(--gold);
+  }
+  .done-score {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 6px;
+  }
+  .done-line {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin: 0 0 22px;
+  }
+
+  /* ---------- Transitions ---------- */
+  .view-enter { animation: viewIn 0.22s ease; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .view-enter { animation: none; }
+    .skeleton-bar { animation: none; }
+  }
 </style>
 </head>
 <body>
 
-<div id="app"><div class="center">Loading...</div></div>
+<div id="app"></div>
 
 <script>
-// ---- CONFIG: change this to your deployed backend URL ----
-const API_BASE = "https://telegram-mini-ai.onrender.com"; // TODO: replace with your Render backend URL before going live
-// ------------------------------------------------------------
+// ---- CONFIG ----
+const API_BASE = "https://telegram-mini-ai.onrender.com";
+// -----------------
 
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); }
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor && tg.setHeaderColor("#10182B"); } catch (e) {}
+  try { tg.setBackgroundColor && tg.setBackgroundColor("#10182B"); } catch (e) {}
+}
 
 let sessionToken = null;
 let state = { view: "loading" };
@@ -94,7 +380,6 @@ async function api(path, options = {}) {
 async function login() {
   const initData = tg?.initData || "";
   if (!initData) {
-    // Not opened inside real Telegram — show a helpful message instead of failing silently
     state = { view: "no_telegram" };
     render();
     return;
@@ -132,7 +417,7 @@ async function openModule(subject, module) {
 }
 
 async function answer(selected) {
-  if (state.answered) return; // already answered this question
+  if (state.answered) return;
   try {
     const q = state.questions[state.index];
     const result = await api("/quiz/answer", {
@@ -157,82 +442,165 @@ function nextQuestion() {
   render();
 }
 
+function doneLine(score, total) {
+  const pct = total ? score / total : 0;
+  if (pct === 1) return "Barcha savollarga to'g'ri javob berdingiz.";
+  if (pct >= 0.8) return "Ajoyib natija — shu tarzda davom eting.";
+  if (pct >= 0.5) return "Yaxshi urinish. Xato javoblarni qayta ko'rib chiqing.";
+  return "Bu modulni yana bir bor takrorlash foydali bo'ladi.";
+}
+
 function render() {
   const app = document.getElementById("app");
+  app.classList.remove("view-enter");
 
   if (state.view === "loading") {
-    app.innerHTML = `<div class="center">Loading...</div>`;
+    app.innerHTML = `
+      <div class="masthead">
+        <div class="seal-mono">HT</div>
+        <div><p class="eyebrow">Milliy sertifikat</p><h1 class="brand">Huquq Testlar</h1></div>
+      </div>
+      ${[1,2,3,4].map(() => `
+        <div class="skeleton-row">
+          <div class="skeleton-bar" style="width:40px;height:28px;"></div>
+          <div style="flex:1"><div class="skeleton-bar" style="width:70%;height:14px;margin-bottom:6px;"></div><div class="skeleton-bar" style="width:40%;height:11px;"></div></div>
+        </div>
+      `).join("")}
+    `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 
   if (state.view === "no_telegram") {
     app.innerHTML = `
-      <div class="center">
-        Please open this app from your Telegram bot's menu button — it needs to run inside Telegram to log you in.
-      </div>`;
+      <div class="notice">
+        <div class="seal-mono">HT</div>
+        <p class="lead">Telegram orqali oching</p>
+        <p>Ushbu ilova botning menyu tugmasi orqali Telegram ichida ochilganda ishlaydi — shundagina hisobingizga kirish mumkin bo'ladi.</p>
+      </div>
+    `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 
   if (state.view === "paywall") {
     app.innerHTML = `
-      <div class="paywall">
+      <div class="paywall-card">
+        <div class="seal-mono">HT</div>
         <h1>Bugungi bepul savollar tugadi</h1>
-        <p>Cheksiz kirish uchun to'lovni amalga oshiring.</p>
-        <button class="btn" onclick="window.location.reload()">Orqaga</button>
-      </div>`;
+        <p>Kuniga 3 ta bepul savol taqdim etiladi. Hisoblagich yarim tunda yangilanadi.</p>
+        <button class="btn ghost" onclick="window.location.reload()">Orqaga qaytish</button>
+        <p class="paywall-note">CHEKSIZ KIRISH — TEZ ORADA</p>
+      </div>
+    `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 
   if (state.view === "subjects") {
     app.innerHTML = `
-      <h1>Fanlar</h1>
-      ${state.subjects.map(s => `
-        <div class="card" onclick='openSubject(${JSON.stringify(s)})'>
-          <p class="card-title">${s.title}</p>
+      <div class="masthead">
+        <div class="seal-mono">HT</div>
+        <div><p class="eyebrow">Milliy sertifikat</p><h1 class="brand">Huquq Testlar</h1></div>
+      </div>
+      <h1 class="page-title">Fanlar</h1>
+      <p class="page-sub">Boshlash uchun fanni tanlang</p>
+      ${state.subjects.length ? `
+        <div class="row-list">
+          ${state.subjects.map((s, i) => `
+            <button class="row" onclick='openSubject(${JSON.stringify(s)})'>
+              <span class="tag">№${i + 1}</span>
+              <span class="row-body">
+                <span class="row-title">${s.title}</span>
+                <span class="row-hint">Fan bo'yicha testlar</span>
+              </span>
+              <span class="chev">›</span>
+            </button>
+          `).join("")}
         </div>
-      `).join("") || `<div class="center">Hozircha fanlar yo'q</div>`}
+      ` : `
+        <div class="notice">
+          <div class="seal-mono">HT</div>
+          <p class="lead">Hozircha fanlar yo'q</p>
+          <p>Fanlar tez orada qo'shiladi. Iltimos, birozdan so'ng qayta tekshiring.</p>
+        </div>
+      `}
     `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 
   if (state.view === "modules") {
     app.innerHTML = `
-      <span class="back" onclick="loadSubjects()">&larr; Orqaga</span>
-      <h1>${state.subject.title}</h1>
-      ${state.modules.map(m => `
-        <div class="card" onclick='openModule(${JSON.stringify(state.subject)}, ${JSON.stringify(m)})'>
-          <p class="card-title">Modul ${m.label}</p>
+      <span class="back" onclick="loadSubjects()">&larr; Fanlarga qaytish</span>
+      <h1 class="page-title">${state.subject.title}</h1>
+      <p class="page-sub">Modulni tanlang</p>
+      ${state.modules.length ? `
+        <div class="row-list">
+          ${state.modules.map(m => `
+            <button class="row" onclick='openModule(${JSON.stringify(state.subject)}, ${JSON.stringify(m)})'>
+              <span class="tag">${m.label}</span>
+              <span class="row-body">
+                <span class="row-title">Moddalar ${m.label}</span>
+                <span class="row-hint">Testni boshlash</span>
+              </span>
+              <span class="chev">›</span>
+            </button>
+          `).join("")}
         </div>
-      `).join("") || `<div class="center">Hozircha modullar yo'q</div>`}
+      ` : `
+        <div class="notice">
+          <div class="seal-mono">HT</div>
+          <p class="lead">Hozircha modullar yo'q</p>
+          <p>Ushbu fan bo'yicha modullar tez orada qo'shiladi.</p>
+        </div>
+      `}
     `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 
   if (state.view === "quiz") {
     const q = state.questions[state.index];
-    if (!q) { app.innerHTML = `<div class="center">Bu modulda savollar yo'q</div>`; return; }
+    if (!q) {
+      app.innerHTML = `
+        <span class="back" onclick='openSubject(${JSON.stringify(state.subject)})'>&larr; Orqaga</span>
+        <div class="notice"><p class="lead">Bu modulda savollar yo'q</p></div>
+      `;
+      void app.offsetWidth; app.classList.add("view-enter");
+      return;
+    }
     const a = state.answered;
     const optKey = (k) => a ? (k === a.correct_option ? "correct" : (k === a.selected ? "wrong" : "")) : "";
+    const pct = Math.round(((state.index + (a ? 1 : 0)) / state.questions.length) * 100);
     app.innerHTML = `
       <span class="back" onclick='openSubject(${JSON.stringify(state.subject)})'>&larr; Orqaga</span>
-      <div class="card-sub">Savol ${state.index + 1} / ${state.questions.length}</div>
-      <h1>${q.text}</h1>
-      <button class="option ${optKey('a')}" onclick="answer('a')">${q.option_a}</button>
-      <button class="option ${optKey('b')}" onclick="answer('b')">${q.option_b}</button>
-      <button class="option ${optKey('c')}" onclick="answer('c')">${q.option_c}</button>
-      <button class="option ${optKey('d')}" onclick="answer('d')">${q.option_d}</button>
+      <div class="quiz-meta">
+        <span class="quiz-count">SAVOL ${state.index + 1} / ${state.questions.length}</span>
+        <span class="quiz-count">${pct}%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <p class="quiz-question">${q.text}</p>
+      <button class="option ${optKey('a')}" onclick="answer('a')"><span class="option-badge">A</span>${q.option_a}</button>
+      <button class="option ${optKey('b')}" onclick="answer('b')"><span class="option-badge">B</span>${q.option_b}</button>
+      <button class="option ${optKey('c')}" onclick="answer('c')"><span class="option-badge">C</span>${q.option_c}</button>
+      <button class="option ${optKey('d')}" onclick="answer('d')"><span class="option-badge">D</span>${q.option_d}</button>
       ${a ? `<button class="btn" onclick="nextQuestion()">Keyingisi</button>` : ""}
     `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 
   if (state.view === "done") {
     app.innerHTML = `
-      <div class="center">
-        <h1>Tugadi!</h1>
-        <p>${state.correctCount} / ${state.questions.length} to'g'ri javob</p>
+      <div class="done-wrap">
+        <div class="done-seal">✓</div>
+        <p class="done-score">${state.correctCount} / ${state.questions.length}</p>
+        <p class="done-line">${doneLine(state.correctCount, state.questions.length)}</p>
         <button class="btn" onclick='openSubject(${JSON.stringify(state.subject)})'>Modullarga qaytish</button>
-      </div>`;
+      </div>
+    `;
+    void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 }
