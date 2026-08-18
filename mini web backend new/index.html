@@ -251,6 +251,42 @@
   }
   .option.wrong .option-badge { background: var(--maroon); color: #fff; }
 
+  /* ---------- AI explain ---------- */
+  .ai-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(201,162,39,0.5);
+    color: var(--gold);
+    border-radius: 11px;
+    font-size: 13.5px; font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+  .ai-btn:active { opacity: 0.7; }
+  .ai-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+  .ai-answer {
+    background: var(--ink-2);
+    border: 1px solid var(--ink-line);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-top: 10px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+  .ai-answer .ai-label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .ai-loading { color: var(--text-dim); font-size: 13px; }
+
   /* ---------- States: loading / empty / no-telegram ---------- */
   .skeleton-row {
     display: flex; align-items: center; gap: 12px;
@@ -438,7 +474,30 @@ function nextQuestion() {
   } else {
     state.index++;
     state.answered = null;
+    state.aiAnswer = null;
+    state.aiLoading = false;
   }
+  render();
+}
+
+async function askAiExplain() {
+  if (!state.answered || state.aiLoading) return;
+  state.aiLoading = true;
+  state.aiAnswer = null;
+  render();
+  try {
+    const q = state.questions[state.index];
+    const opts = { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d };
+    const context = `Savol: ${q.text}\nVariantlar: A) ${q.option_a} B) ${q.option_b} C) ${q.option_c} D) ${q.option_d}\nTo'g'ri javob: ${opts[state.answered.correct_option]}`;
+    const data = await api("/ai/ask", {
+      method: "POST",
+      body: JSON.stringify({ question: "Nega bu javob to'g'ri? Qisqa va aniq tushuntiring.", context }),
+    });
+    state.aiAnswer = data.answer;
+  } catch (e) {
+    if (e.message !== "paywall") state.aiAnswer = "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.";
+  }
+  state.aiLoading = false;
   render();
 }
 
@@ -585,7 +644,14 @@ function render() {
       <button class="option ${optKey('b')}" onclick="answer('b')"><span class="option-badge">B</span>${q.option_b}</button>
       <button class="option ${optKey('c')}" onclick="answer('c')"><span class="option-badge">C</span>${q.option_c}</button>
       <button class="option ${optKey('d')}" onclick="answer('d')"><span class="option-badge">D</span>${q.option_d}</button>
-      ${a ? `<button class="btn" onclick="nextQuestion()">Keyingisi</button>` : ""}
+      ${a ? `
+        <button class="ai-btn" onclick="askAiExplain()" ${state.aiLoading ? "disabled" : ""}>
+          <span class="dot"></span> AI dan tushuntirish so'rash
+        </button>
+        ${state.aiLoading ? `<p class="ai-loading">Javob tayyorlanmoqda...</p>` : ""}
+        ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI YORDAMCHI</span>${state.aiAnswer}</div>` : ""}
+        <button class="btn" onclick="nextQuestion()">Keyingisi</button>
+      ` : ""}
     `;
     void app.offsetWidth; app.classList.add("view-enter");
     return;
