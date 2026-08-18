@@ -7,3 +7,5 @@ pydantic-settings==2.5.2
 python-multipart==0.0.9
 python-dotenv==1.0.1
 alembic==1.13.2
+httpx==0.28.1
+google-genai

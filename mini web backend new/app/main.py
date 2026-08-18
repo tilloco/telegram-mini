@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.config import settings
-from app.routers import auth, content, quiz
+from app.routers import auth, content, quiz, ai 
 
 # Creates tables on startup if they don't exist yet.
 # Fine for now — once the schema stabilizes, switch to Alembic migrations.
@@ -30,7 +30,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(content.router)
 app.include_router(quiz.router)
-
+app.include_router(ai.router)
 
 @app.get("/")
 def health_check():

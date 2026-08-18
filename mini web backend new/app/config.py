@@ -15,6 +15,8 @@ class Settings(BaseSettings):
 
     # How long a session token stays valid, in hours
     session_ttl_hours: int = 24 * 30
+   # Gemini API key for AI question-answering — https://aistudio.google.com
+    gemini_api_key: str = ""
 
     class Config:
         env_file = ".env"
