@@ -509,6 +509,13 @@ function doneLine(score, total) {
   return "Bu modulni yana bir bor takrorlash foydali bo'ladi.";
 }
 
+// ---- Escaping helper (titles/questions may contain quotes, &, <, > from source text) ----
+function esc(str) {
+  return String(str ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 function render() {
   const app = document.getElementById("app");
   app.classList.remove("view-enter");
@@ -548,7 +555,7 @@ function render() {
         <div class="seal-mono">HT</div>
         <h1>Bugungi bepul savollar tugadi</h1>
         <p>Kuniga 3 ta bepul savol taqdim etiladi. Hisoblagich yarim tunda yangilanadi.</p>
-        <button class="btn ghost" onclick="window.location.reload()">Orqaga qaytish</button>
+        <button class="btn ghost" data-action="reload">Orqaga qaytish</button>
         <p class="paywall-note">CHEKSIZ KIRISH — TEZ ORADA</p>
       </div>
     `;
@@ -567,10 +574,10 @@ function render() {
       ${state.subjects.length ? `
         <div class="row-list">
           ${state.subjects.map((s, i) => `
-            <button class="row" onclick='openSubject(${JSON.stringify(s)})'>
+            <button class="row" data-action="open-subject" data-subject-id="${esc(s.id)}">
               <span class="tag">№${i + 1}</span>
               <span class="row-body">
-                <span class="row-title">${s.title}</span>
+                <span class="row-title">${esc(s.title)}</span>
                 <span class="row-hint">Fan bo'yicha testlar</span>
               </span>
               <span class="chev">›</span>
@@ -591,16 +598,16 @@ function render() {
 
   if (state.view === "modules") {
     app.innerHTML = `
-      <span class="back" onclick="loadSubjects()">&larr; Fanlarga qaytish</span>
-      <h1 class="page-title">${state.subject.title}</h1>
+      <span class="back" data-action="back-to-subjects">&larr; Fanlarga qaytish</span>
+      <h1 class="page-title">${esc(state.subject.title)}</h1>
       <p class="page-sub">Modulni tanlang</p>
       ${state.modules.length ? `
         <div class="row-list">
           ${state.modules.map(m => `
-            <button class="row" onclick='openModule(${JSON.stringify(state.subject)}, ${JSON.stringify(m)})'>
-              <span class="tag">${m.label}</span>
+            <button class="row" data-action="open-module" data-module-id="${esc(m.id)}">
+              <span class="tag">${esc(m.label)}</span>
               <span class="row-body">
-                <span class="row-title">Moddalar ${m.label}</span>
+                <span class="row-title">Moddalar ${esc(m.label)}</span>
                 <span class="row-hint">Testni boshlash</span>
               </span>
               <span class="chev">›</span>
@@ -623,7 +630,7 @@ function render() {
     const q = state.questions[state.index];
     if (!q) {
       app.innerHTML = `
-        <span class="back" onclick='openSubject(${JSON.stringify(state.subject)})'>&larr; Orqaga</span>
+        <span class="back" data-action="back-to-modules">&larr; Orqaga</span>
         <div class="notice"><p class="lead">Bu modulda savollar yo'q</p></div>
       `;
       void app.offsetWidth; app.classList.add("view-enter");
@@ -633,24 +640,24 @@ function render() {
     const optKey = (k) => a ? (k === a.correct_option ? "correct" : (k === a.selected ? "wrong" : "")) : "";
     const pct = Math.round(((state.index + (a ? 1 : 0)) / state.questions.length) * 100);
     app.innerHTML = `
-      <span class="back" onclick='openSubject(${JSON.stringify(state.subject)})'>&larr; Orqaga</span>
+      <span class="back" data-action="back-to-modules">&larr; Orqaga</span>
       <div class="quiz-meta">
         <span class="quiz-count">SAVOL ${state.index + 1} / ${state.questions.length}</span>
         <span class="quiz-count">${pct}%</span>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <p class="quiz-question">${q.text}</p>
-      <button class="option ${optKey('a')}" onclick="answer('a')"><span class="option-badge">A</span>${q.option_a}</button>
-      <button class="option ${optKey('b')}" onclick="answer('b')"><span class="option-badge">B</span>${q.option_b}</button>
-      <button class="option ${optKey('c')}" onclick="answer('c')"><span class="option-badge">C</span>${q.option_c}</button>
-      <button class="option ${optKey('d')}" onclick="answer('d')"><span class="option-badge">D</span>${q.option_d}</button>
+      <p class="quiz-question">${esc(q.text)}</p>
+      <button class="option ${optKey('a')}" data-action="answer" data-option="a"><span class="option-badge">A</span>${esc(q.option_a)}</button>
+      <button class="option ${optKey('b')}" data-action="answer" data-option="b"><span class="option-badge">B</span>${esc(q.option_b)}</button>
+      <button class="option ${optKey('c')}" data-action="answer" data-option="c"><span class="option-badge">C</span>${esc(q.option_c)}</button>
+      <button class="option ${optKey('d')}" data-action="answer" data-option="d"><span class="option-badge">D</span>${esc(q.option_d)}</button>
       ${a ? `
-        <button class="ai-btn" onclick="askAiExplain()" ${state.aiLoading ? "disabled" : ""}>
+        <button class="ai-btn" data-action="ai-explain" ${state.aiLoading ? "disabled" : ""}>
           <span class="dot"></span> AI dan tushuntirish so'rash
         </button>
         ${state.aiLoading ? `<p class="ai-loading">Javob tayyorlanmoqda...</p>` : ""}
-        ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI YORDAMCHI</span>${state.aiAnswer}</div>` : ""}
-        <button class="btn" onclick="nextQuestion()">Keyingisi</button>
+        ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI YORDAMCHI</span>${esc(state.aiAnswer)}</div>` : ""}
+        <button class="btn" data-action="next">Keyingisi</button>
       ` : ""}
     `;
     void app.offsetWidth; app.classList.add("view-enter");
@@ -663,13 +670,41 @@ function render() {
         <div class="done-seal">✓</div>
         <p class="done-score">${state.correctCount} / ${state.questions.length}</p>
         <p class="done-line">${doneLine(state.correctCount, state.questions.length)}</p>
-        <button class="btn" onclick='openSubject(${JSON.stringify(state.subject)})'>Modullarga qaytish</button>
+        <button class="btn" data-action="back-to-modules">Modullarga qaytish</button>
       </div>
     `;
     void app.offsetWidth; app.classList.add("view-enter");
     return;
   }
 }
+
+// ---- Single delegated click handler (avoids inline onclick entirely — some Telegram
+// WebViews block inline event-handler attributes via CSP, which silently breaks buttons) ----
+document.getElementById("app").addEventListener("click", (e) => {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const action = el.dataset.action;
+
+  if (action === "open-subject") {
+    const subject = state.subjects.find(s => String(s.id) === el.dataset.subjectId);
+    if (subject) openSubject(subject);
+  } else if (action === "open-module") {
+    const module = state.modules.find(m => String(m.id) === el.dataset.moduleId);
+    if (module) openModule(state.subject, module);
+  } else if (action === "back-to-subjects") {
+    loadSubjects();
+  } else if (action === "back-to-modules") {
+    openSubject(state.subject);
+  } else if (action === "answer") {
+    answer(el.dataset.option);
+  } else if (action === "ai-explain") {
+    askAiExplain();
+  } else if (action === "next") {
+    nextQuestion();
+  } else if (action === "reload") {
+    window.location.reload();
+  }
+});
 
 login();
 </script>
