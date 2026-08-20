@@ -49,7 +49,6 @@
 
   #app { max-width: 480px; margin: 0 auto; }
 
-  /* ---------- Masthead ---------- */
   .masthead {
     display: flex;
     align-items: center;
@@ -98,7 +97,6 @@
     margin: 0 0 18px;
   }
 
-  /* ---------- Rows (subjects / modules) ---------- */
   .row-list { display: flex; flex-direction: column; }
   .row {
     display: flex;
@@ -145,7 +143,6 @@
   }
   .chev { flex: none; color: var(--text-dim); font-size: 18px; }
 
-  /* ---------- Buttons ---------- */
   .btn {
     display: block;
     width: 100%;
@@ -179,7 +176,6 @@
   }
   .back:active { opacity: 0.6; }
 
-  /* ---------- Quiz ---------- */
   .quiz-meta {
     display: flex;
     justify-content: space-between;
@@ -251,7 +247,36 @@
   }
   .option.wrong .option-badge { background: var(--maroon); color: #fff; }
 
-  /* ---------- AI explain ---------- */
+  .result-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    margin: 4px 0 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .result-banner.is-correct {
+    background: rgba(76,122,92,0.16);
+    color: #9FD6B0;
+    border: 1px solid rgba(76,122,92,0.5);
+  }
+  .result-banner.is-wrong {
+    background: rgba(154,59,69,0.16);
+    color: #F0A9AF;
+    border: 1px solid rgba(154,59,69,0.5);
+  }
+  .result-banner .r-icon {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .result-banner.is-correct .r-icon { background: var(--sage); color: #fff; }
+  .result-banner.is-wrong .r-icon { background: var(--maroon); color: #fff; }
+
   .ai-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     width: 100%; padding: 12px;
@@ -287,7 +312,6 @@
   }
   .ai-loading { color: var(--text-dim); font-size: 13px; }
 
-  /* ---------- States: loading / empty / no-telegram ---------- */
   .skeleton-row {
     display: flex; align-items: center; gap: 12px;
     padding: 15px 2px;
@@ -316,7 +340,6 @@
     margin-bottom: 6px;
   }
 
-  /* ---------- Paywall ---------- */
   .paywall-card {
     text-align: center;
     padding: 34px 22px;
@@ -349,7 +372,6 @@
     font-family: 'IBM Plex Mono', monospace;
   }
 
-  /* ---------- Done screen ---------- */
   .done-wrap { text-align: center; padding: 30px 10px; }
   .done-seal {
     width: 74px; height: 74px;
@@ -373,7 +395,6 @@
     margin: 0 0 22px;
   }
 
-  /* ---------- Transitions ---------- */
   .view-enter { animation: viewIn 0.22s ease; }
   @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
@@ -480,6 +501,8 @@ function nextQuestion() {
   render();
 }
 
+// ---- AI Tutor: only fires when the user taps the button, and adapts the
+// question sent to the AI depending on whether they got it right or wrong ----
 async function askAiExplain() {
   if (!state.answered || state.aiLoading) return;
   state.aiLoading = true;
@@ -488,10 +511,23 @@ async function askAiExplain() {
   try {
     const q = state.questions[state.index];
     const opts = { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d };
-    const context = `Savol: ${q.text}\nVariantlar: A) ${q.option_a} B) ${q.option_b} C) ${q.option_c} D) ${q.option_d}\nTo'g'ri javob: ${opts[state.answered.correct_option]}`;
+    const wasCorrect = state.answered.correct;
+    const correctText = opts[state.answered.correct_option];
+    const selectedText = opts[state.answered.selected];
+
+    let context = `Savol: ${q.text}\nVariantlar: A) ${q.option_a} B) ${q.option_b} C) ${q.option_c} D) ${q.option_d}\nTo'g'ri javob: ${correctText}`;
+    let question;
+
+    if (wasCorrect) {
+      question = "Nega bu javob to'g'ri? Qisqa va aniq tushuntiring.";
+    } else {
+      context += `\nO'quvchi tanlagan (noto'g'ri) javob: ${selectedText}`;
+      question = "O'quvchi noto'g'ri javobni tanladi. Repetitor sifatida tushuntiring: 1) nega o'quvchi tanlagan javob noto'g'ri, 2) nega to'g'ri javob to'g'ri. Qisqa va aniq bo'lsin.";
+    }
+
     const data = await api("/ai/ask", {
       method: "POST",
-      body: JSON.stringify({ question: "Nega bu javob to'g'ri? Qisqa va aniq tushuntiring.", context }),
+      body: JSON.stringify({ question, context }),
     });
     state.aiAnswer = data.answer;
   } catch (e) {
@@ -509,7 +545,6 @@ function doneLine(score, total) {
   return "Bu modulni yana bir bor takrorlash foydali bo'ladi.";
 }
 
-// ---- Escaping helper (titles/questions may contain quotes, &, <, > from source text) ----
 function esc(str) {
   return String(str ?? "").replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -652,11 +687,15 @@ function render() {
       <button class="option ${optKey('c')}" data-action="answer" data-option="c"><span class="option-badge">C</span>${esc(q.option_c)}</button>
       <button class="option ${optKey('d')}" data-action="answer" data-option="d"><span class="option-badge">D</span>${esc(q.option_d)}</button>
       ${a ? `
+        <div class="result-banner ${a.correct ? 'is-correct' : 'is-wrong'}">
+          <span class="r-icon">${a.correct ? '✓' : '✕'}</span>
+          <span>${a.correct ? "To'g'ri javob!" : "Noto'g'ri javob."}</span>
+        </div>
         <button class="ai-btn" data-action="ai-explain" ${state.aiLoading ? "disabled" : ""}>
-          <span class="dot"></span> AI dan tushuntirish so'rash
+          <span class="dot"></span> ${a.correct ? "AI dan tushuntirish so'rash" : "Nega xato? AI dan so'rang"}
         </button>
         ${state.aiLoading ? `<p class="ai-loading">Javob tayyorlanmoqda...</p>` : ""}
-        ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI YORDAMCHI</span>${esc(state.aiAnswer)}</div>` : ""}
+        ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI REPETITOR</span>${esc(state.aiAnswer)}</div>` : ""}
         <button class="btn" data-action="next">Keyingisi</button>
       ` : ""}
     `;
@@ -678,8 +717,6 @@ function render() {
   }
 }
 
-// ---- Single delegated click handler (avoids inline onclick entirely — some Telegram
-// WebViews block inline event-handler attributes via CSP, which silently breaks buttons) ----
 document.getElementById("app").addEventListener("click", (e) => {
   const el = e.target.closest("[data-action]");
   if (!el) return;
