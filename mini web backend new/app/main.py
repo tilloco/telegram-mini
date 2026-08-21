@@ -7,7 +7,8 @@ from app.database import Base, engine
 from app.config import settings
 from app.routers import auth, content, quiz, ai 
 from fastapi.responses import FileResponse
-
+from app.routers import admin
+app.include_router(admin.router)
 # Creates tables on startup if they don't exist yet.
 # Fine for now — once the schema stabilizes, switch to Alembic migrations.
 Base.metadata.create_all(bind=engine)
