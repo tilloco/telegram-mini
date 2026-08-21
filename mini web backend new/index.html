@@ -6,6 +6,17 @@
 <meta name="theme-color" content="#10182B">
 <title>Huquq Testlar</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  // Debug console for testing on a real phone: open the mini app URL with
+  // ?debug=1 appended and a floating console button appears so you can see
+  // JS errors and network requests directly on your phone, no desktop needed.
+  if (new URLSearchParams(window.location.search).get("debug") === "1") {
+    var erudaScript = document.createElement("script");
+    erudaScript.src = "https://cdn.jsdelivr.net/npm/eruda";
+    erudaScript.onload = function () { window.eruda && window.eruda.init(); };
+    document.head.appendChild(erudaScript);
+  }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -468,6 +479,7 @@ if (tg) {
 }
 
 let sessionToken = null;
+let cachedSubjects = [];
 let state = { view: "loading" };
 
 async function api(path, options = {}) {
@@ -499,8 +511,43 @@ async function loadSubjects() {
   state = { view: "loading" };
   render();
   const subjects = await api("/content/subjects");
+  cachedSubjects = subjects;
   state = { view: "subjects", subjects };
   render();
+}
+
+function openAiTutor() {
+  state = { view: "ai_tutor", aiTutorThread: [], aiTutorLoading: false };
+  render();
+}
+
+async function askAiTutor() {
+  const input = document.getElementById("aiTutorInput");
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text || state.aiTutorLoading) return;
+  input.value = "";
+  state.aiTutorThread.push({ role: "q", text });
+  state.aiTutorLoading = true;
+  render();
+  try {
+    const data = await api("/ai/ask", {
+      method: "POST",
+      body: JSON.stringify({
+        question: text,
+        context: "Foydalanuvchi Milliy sertifikat imtihoniga (huquq fanlari: Konstitutsiyaviy huquq, Fuqarolik huquqi va h.k.) tayyorlanmoqda. Savolga repetitor sifatida qisqa va aniq javob bering.",
+      }),
+    });
+    state.aiTutorThread.push({ role: "a", text: data.answer });
+  } catch (e) {
+    if (e.message !== "paywall") {
+      state.aiTutorThread.push({ role: "a", text: "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring." });
+    }
+  }
+  state.aiTutorLoading = false;
+  render();
+  const freshInput = document.getElementById("aiTutorInput");
+  if (freshInput) freshInput.focus();
 }
 
 async function openSubject(subject) {
@@ -686,6 +733,16 @@ function render() {
         <div class="seal-mono">HT</div>
         <div><p class="eyebrow">Milliy sertifikat</p><h1 class="brand">Huquq Testlar</h1></div>
       </div>
+      <div class="row-list" style="margin-bottom: 22px;">
+        <button class="row" data-action="open-ai-tutor">
+          <span class="tag">AI</span>
+          <span class="row-body">
+            <span class="row-title">AI Repetitordan so'rang</span>
+            <span class="row-hint">Har qanday huquqiy savolingizni bering</span>
+          </span>
+          <span class="chev">›</span>
+        </button>
+      </div>
       <h1 class="page-title">Fanlar</h1>
       <p class="page-sub">Boshlash uchun fanni tanlang</p>
       ${state.subjects.length ? `
@@ -803,6 +860,36 @@ function render() {
     return;
   }
 
+  if (state.view === "ai_tutor") {
+    app.innerHTML = `
+      <span class="back" data-action="back-to-subjects">&larr; Fanlarga qaytish</span>
+      <h1 class="page-title">AI Repetitor</h1>
+      <p class="page-sub">Har qanday huquqiy savolingizni bering</p>
+      <div class="ai-thread">
+        ${state.aiTutorThread.map(t => `
+          <div class="ai-turn ${t.role}">
+            <span class="ai-label">${t.role === 'q' ? "SIZ" : "AI REPETITOR"}</span>
+            ${esc(t.text)}
+          </div>
+        `).join("")}
+        ${state.aiTutorLoading ? `<p class="ai-loading">Javob tayyorlanmoqda...</p>` : ""}
+      </div>
+      <div class="ai-followup">
+        <input type="text" id="aiTutorInput" placeholder="Savolingizni yozing..." ${state.aiTutorLoading ? "disabled" : ""} />
+        <button data-action="ai-tutor-send" ${state.aiTutorLoading ? "disabled" : ""}>${state.aiTutorLoading ? "..." : "Yuborish"}</button>
+      </div>
+    `;
+    void app.offsetWidth; app.classList.add("view-enter");
+    const tutorInput = document.getElementById("aiTutorInput");
+    if (tutorInput) {
+      tutorInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") askAiTutor();
+      });
+      tutorInput.focus();
+    }
+    return;
+  }
+
   if (state.view === "done") {
     app.innerHTML = `
       <div class="done-wrap">
@@ -829,11 +916,20 @@ document.getElementById("app").addEventListener("click", (e) => {
     const module = state.modules.find(m => String(m.id) === el.dataset.moduleId);
     if (module) openModule(state.subject, module);
   } else if (action === "back-to-subjects") {
-    loadSubjects();
+    if (cachedSubjects.length) {
+      state = { view: "subjects", subjects: cachedSubjects };
+      render();
+    } else {
+      loadSubjects();
+    }
   } else if (action === "back-to-modules") {
     openSubject(state.subject);
   } else if (action === "answer") {
     answer(el.dataset.option);
+  } else if (action === "open-ai-tutor") {
+    openAiTutor();
+  } else if (action === "ai-tutor-send") {
+    askAiTutor();
   } else if (action === "ai-followup") {
     askFollowup();
   } else if (action === "next") {
