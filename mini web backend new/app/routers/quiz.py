@@ -55,12 +55,17 @@ def submit_answer(payload: AnswerRequest, db: Session = Depends(get_db), user=De
     ).first()
 
     if not progress:
-        progress = Progress(user_id=user.id, module_id=question.module_id)
+        progress = Progress(
+            user_id=user.id,
+            module_id=question.module_id,
+            last_question_index=0,
+            correct_count=0,
+        )
         db.add(progress)
 
-    progress.last_question_index += 1
+    progress.last_question_index = (progress.last_question_index or 0) + 1
     if is_correct:
-        progress.correct_count += 1
+        progress.correct_count = (progress.correct_count or 0) + 1
 
     db.commit()
 
