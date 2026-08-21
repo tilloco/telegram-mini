@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#10182B">
+<meta name="theme-color" content="#0B0D12">
 <title>Huquq Testlar</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
@@ -19,133 +19,117 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #10182B;
-    --ink-2: #182238;
-    --ink-line: #2A3654;
-    --paper: #F7F2E7;
-    --paper-2: #EDE4D0;
-    --paper-line: #DCD0B4;
-    --gold: #C9A227;
-    --gold-deep: #A2801C;
-    --maroon: #9A3B45;
-    --sage: #4C7A5C;
-    --text: #EEEAE0;
-    --text-dim: #9AA3C0;
-    --text-ink: #221D14;
-    --text-ink-dim: #6E6552;
-    --radius: 14px;
-    --blue: #5B9DF9;
-    --blue-deep: #3B76D6;
+    --bg: #0B0D12;
+    --surface: #14171F;
+    --surface-2: #1B1F2A;
+    --border: #262B37;
+    --text: #EDEEF2;
+    --text-dim: #868C9B;
+    --text-faint: #565C6B;
+
+    --accent: #6E8BFA;
+    --accent-dim: #4E63B0;
+    --accent-soft: rgba(110, 139, 250, 0.12);
+    --accent-soft-strong: rgba(110, 139, 250, 0.18);
+
+    --good: #4FBE84;
+    --good-soft: rgba(79, 190, 132, 0.12);
+    --bad: #E5686B;
+    --bad-soft: rgba(229, 104, 107, 0.12);
+
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-  html, body {
-    height: 100%;
-    overscroll-behavior-y: none;
-  }
+  html, body { height: 100%; overscroll-behavior-y: none; }
 
   body {
     margin: 0;
     min-height: 100dvh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--ink);
-    background-image:
-      radial-gradient(ellipse 600px 300px at 50% -10%, rgba(201,162,39,0.10), transparent),
-      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    background: var(--bg);
     color: var(--text);
-    padding: 18px 16px calc(28px + env(safe-area-inset-bottom));
+    padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
   }
 
   #app { max-width: 480px; margin: 0 auto; }
 
-  .masthead {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 22px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--ink-line);
-  }
-  .seal-mono {
-    width: 42px; height: 42px; flex: none;
-    border-radius: 50%;
-    border: 1.5px solid var(--gold);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Spectral', serif;
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--gold);
-    letter-spacing: 0.5px;
-  }
+  /* ---------- Masthead ---------- */
+  .masthead { margin-bottom: 26px; }
   .eyebrow {
-    margin: 0;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 1.6px;
-    color: var(--gold);
-    text-transform: uppercase;
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--accent);
   }
   .brand {
-    margin: 2px 0 0;
-    font-family: 'Spectral', serif;
-    font-weight: 600;
-    font-size: 20px;
+    margin: 0;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.3px;
     color: var(--text);
   }
 
   h1.page-title {
-    font-family: 'Spectral', serif;
-    font-weight: 600;
-    font-size: 22px;
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: -0.2px;
     margin: 0 0 4px;
     color: var(--text);
   }
   .page-sub {
-    font-size: 13px;
+    font-size: 13.5px;
     color: var(--text-dim);
-    margin: 0 0 18px;
+    margin: 0 0 20px;
   }
 
-  .row-list { display: flex; flex-direction: column; }
+  /* ---------- Row list (subjects / modules) ---------- */
+  .row-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
   .row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 13px;
     width: 100%;
     text-align: left;
-    background: none;
-    border: none;
-    border-bottom: 1px solid var(--ink-line);
-    padding: 15px 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 15px 14px;
     cursor: pointer;
     font: inherit;
     color: inherit;
-    transition: opacity 0.15s;
+    transition: border-color 0.15s, transform 0.1s, background 0.15s;
   }
-  .row:active { opacity: 0.55; }
-  .row:last-child { border-bottom: none; }
+  .row:active { transform: scale(0.985); background: var(--surface-2); }
   .tag {
     flex: none;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gold);
-    border: 1px solid rgba(201,162,39,0.4);
-    border-radius: 7px;
-    padding: 5px 8px;
-    min-width: 40px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 6px 9px;
+    min-width: 30px;
     text-align: center;
   }
   .row-body { flex: 1; min-width: 0; }
   .row-title {
     display: block;
-    font-family: 'Spectral', serif;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text);
   }
   .row-hint {
@@ -154,35 +138,27 @@
     color: var(--text-dim);
     margin-top: 2px;
   }
-  .chev { flex: none; color: var(--text-dim); font-size: 18px; }
+  .chev { flex: none; color: var(--text-faint); font-size: 18px; }
 
-  .tag-blue { color: var(--blue); border-color: rgba(91,157,249,0.45); }
-  .ai-tutor-row {
-    position: sticky;
-    top: 0;
-    z-index: 6;
-    background: var(--ink);
-    padding-top: 2px;
-    margin: 0 0 18px;
-  }
+  .ai-tutor-row { margin: 0 0 20px; }
   .ai-tutor-row .row {
-    background: linear-gradient(135deg, rgba(91,157,249,0.10), rgba(91,157,249,0.02));
-    border: 1px solid rgba(91,157,249,0.28);
-    border-radius: var(--radius);
-    padding: 13px 12px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(110,139,250,0.28);
   }
-  .ai-tutor-row .row-title { color: var(--blue); }
+  .ai-tutor-row .tag { background: rgba(110,139,250,0.22); }
+  .ai-tutor-row .row-title { color: var(--text); }
 
+  /* ---------- Buttons ---------- */
   .btn {
     display: block;
     width: 100%;
     padding: 15px;
-    background: var(--gold);
-    color: #1A1305;
+    background: var(--accent);
+    color: #0B0D12;
     border: none;
-    border-radius: 11px;
+    border-radius: var(--radius-sm);
     font-family: 'Inter', sans-serif;
-    font-size: 15.5px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     margin-top: 14px;
@@ -190,10 +166,22 @@
   }
   .btn:active { transform: scale(0.98); opacity: 0.9; }
   .btn.ghost {
-    background: transparent;
+    background: var(--surface);
     color: var(--text);
-    border: 1px solid var(--ink-line);
+    border: 1px solid var(--border);
   }
+  .btn.subtle {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(110,139,250,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 13px;
+    font-size: 14px;
+  }
+  .btn.subtle:active { background: var(--accent-soft); }
 
   .back {
     display: inline-flex;
@@ -201,39 +189,37 @@
     gap: 4px;
     color: var(--text-dim);
     font-size: 13.5px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     cursor: pointer;
   }
   .back:active { opacity: 0.6; }
 
+  /* ---------- Quiz ---------- */
   .quiz-meta {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 8px;
   }
-  .quiz-count {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
-  }
+  .quiz-count { font-size: 12.5px; font-weight: 600; color: var(--text-dim); }
   .progress-track {
-    height: 3px;
-    background: var(--ink-line);
+    height: 4px;
+    background: var(--surface-2);
     border-radius: 2px;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
   .progress-fill {
     height: 100%;
-    background: var(--gold);
+    background: var(--accent);
+    border-radius: 2px;
     transition: width 0.3s ease;
   }
   .quiz-question {
-    font-family: 'Spectral', serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 19px;
-    line-height: 1.4;
+    line-height: 1.42;
+    letter-spacing: -0.2px;
     color: var(--text);
     margin: 0 0 20px;
   }
@@ -244,174 +230,130 @@
     gap: 12px;
     width: 100%;
     text-align: left;
-    padding: 14px;
-    background: var(--paper);
-    border: 1.5px solid var(--paper-line);
-    border-radius: var(--radius);
+    padding: 14px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: var(--radius-md);
     font-size: 14.5px;
-    color: var(--text-ink);
-    margin-bottom: 10px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 9px;
     cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
+    transition: border-color 0.15s, background 0.15s, opacity 0.15s;
   }
-  .option:active { opacity: 0.85; }
+  .option:active { background: var(--surface-2); }
   .option-badge {
     flex: none;
-    width: 26px; height: 26px;
+    width: 25px; height: 25px;
     border-radius: 50%;
-    background: var(--paper-2);
+    background: var(--surface-2);
     display: flex; align-items: center; justify-content: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-    font-size: 12px;
-    color: var(--text-ink-dim);
+    font-weight: 700;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    transition: background 0.15s, color 0.15s;
   }
   .option.correct {
-    border-color: var(--sage);
-    background: rgba(76,122,92,0.14);
+    border-color: var(--border);
+    border-left-color: var(--good);
+    background: var(--good-soft);
   }
-  .option.correct .option-badge { background: var(--sage); color: #fff; }
+  .option.correct .option-badge { background: var(--good); color: #0B0D12; }
   .option.wrong {
-    border-color: var(--maroon);
-    background: rgba(154,59,69,0.14);
+    border-color: var(--border);
+    border-left-color: var(--bad);
+    background: var(--bad-soft);
   }
-  .option.wrong .option-badge { background: var(--maroon); color: #fff; }
+  .option.wrong .option-badge { background: var(--bad); color: #0B0D12; }
+  .option.faded { opacity: 0.45; }
 
   .result-banner {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    border-radius: var(--radius);
-    margin: 4px 0 16px;
+    border-radius: var(--radius-sm);
+    margin: 6px 0 16px;
     font-size: 13.5px;
     font-weight: 600;
   }
-  .result-banner.is-correct {
-    background: rgba(76,122,92,0.16);
-    color: #9FD6B0;
-    border: 1px solid rgba(76,122,92,0.5);
-  }
-  .result-banner.is-wrong {
-    background: rgba(154,59,69,0.16);
-    color: #F0A9AF;
-    border: 1px solid rgba(154,59,69,0.5);
-  }
+  .result-banner.is-correct { background: var(--good-soft); color: var(--good); }
+  .result-banner.is-wrong { background: var(--bad-soft); color: var(--bad); }
   .result-banner .r-icon {
     flex: none;
-    width: 22px; height: 22px;
+    width: 21px; height: 21px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
   }
-  .result-banner.is-correct .r-icon { background: var(--sage); color: #fff; }
-  .result-banner.is-wrong .r-icon { background: var(--maroon); color: #fff; }
+  .result-banner.is-correct .r-icon { background: var(--good); color: #0B0D12; }
+  .result-banner.is-wrong .r-icon { background: var(--bad); color: #0B0D12; }
 
-  .ai-thread {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 12px;
-  }
-  .ai-turn {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    max-width: 88%;
-    animation: bubbleIn 0.24s ease;
-  }
+  /* ---------- AI thread ---------- */
+  .ai-thread { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .ai-turn { display: flex; align-items: flex-end; gap: 8px; max-width: 88%; animation: bubbleIn 0.2s ease; }
   .ai-turn.q { align-self: flex-end; flex-direction: row-reverse; }
   .ai-turn.a { align-self: flex-start; }
   .ai-avatar {
     flex: none;
-    width: 24px; height: 24px;
+    width: 23px; height: 23px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'IBM Plex Mono', monospace;
     font-size: 9.5px;
     font-weight: 700;
   }
-  .ai-turn.q .ai-avatar { background: var(--blue); color: #fff; }
-  .ai-turn.a .ai-avatar { background: var(--ink-2); border: 1px solid var(--blue); color: var(--blue); }
+  .ai-turn.q .ai-avatar { background: var(--accent); color: #0B0D12; }
+  .ai-turn.a .ai-avatar { background: var(--surface-2); border: 1px solid var(--border); color: var(--accent); }
   .ai-bubble {
     padding: 11px 14px;
     font-size: 13.5px;
-    line-height: 1.62;
+    line-height: 1.6;
     white-space: pre-wrap;
-    border-radius: 16px;
+    border-radius: 15px;
   }
-  .ai-turn.q .ai-bubble {
-    background: linear-gradient(135deg, var(--blue), var(--blue-deep));
-    color: #fff;
-    border-radius: 16px 16px 4px 16px;
-  }
-  .ai-turn.a .ai-bubble {
-    background: var(--ink-2);
-    border: 1px solid var(--ink-line);
-    color: var(--text);
-    border-radius: 16px 16px 16px 4px;
-  }
-  @keyframes bubbleIn {
-    from { opacity: 0; transform: translateY(8px) scale(0.97); }
-    to { opacity: 1; transform: none; }
-  }
+  .ai-turn.q .ai-bubble { background: var(--accent); color: #0B0D12; border-radius: 15px 15px 4px 15px; font-weight: 500; }
+  .ai-turn.a .ai-bubble { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 15px 15px 15px 4px; }
+  @keyframes bubbleIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   .ai-typing { align-self: flex-start; display: flex; align-items: flex-end; gap: 8px; }
   .ai-typing-bubble {
-    background: var(--ink-2);
-    border: 1px solid var(--ink-line);
-    border-radius: 16px 16px 16px 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 15px 15px 15px 4px;
     padding: 11px 15px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
+    display: flex; align-items: center; gap: 7px;
   }
-  .ai-typing-bubble .ai-typing-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11.5px;
-    color: var(--text-dim);
-  }
+  .ai-typing-bubble .ai-typing-label { font-size: 12px; color: var(--text-dim); }
   .ai-typing-bubble .dots { display: flex; gap: 3px; }
-  .ai-typing-bubble .dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--blue);
-    animation: dotBounce 1.1s infinite ease-in-out;
-  }
+  .ai-typing-bubble .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: dotBounce 1.1s infinite ease-in-out; }
   .ai-typing-bubble .dot:nth-child(2) { animation-delay: 0.15s; }
   .ai-typing-bubble .dot:nth-child(3) { animation-delay: 0.3s; }
-  @keyframes dotBounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
-    30% { transform: translateY(-4px); opacity: 1; }
-  }
+  @keyframes dotBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.45; } 30% { transform: translateY(-4px); opacity: 1; } }
 
-  .ai-followup {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
+  .ai-followup { display: flex; gap: 8px; margin-top: 12px; }
   .ai-followup input {
     flex: 1;
-    padding: 12px 13px;
-    background: var(--ink-2);
-    border: 1px solid var(--ink-line);
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 20px;
     color: var(--text);
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
   }
-  .ai-followup input:focus { outline: none; border-color: rgba(91,157,249,0.6); }
-  .ai-followup input::placeholder { color: var(--text-dim); }
+  .ai-followup input:focus { outline: none; border-color: var(--accent); }
+  .ai-followup input::placeholder { color: var(--text-faint); }
   .ai-followup button {
     flex: none;
     padding: 0 18px;
-    background: var(--blue);
+    background: var(--accent);
     border: none;
-    color: #fff;
+    color: #0B0D12;
     border-radius: 20px;
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
   }
   .ai-followup button:active { opacity: 0.75; }
@@ -427,96 +369,66 @@
     z-index: 8;
   }
   .ai-tutor-composer .ai-followup { margin-top: 0; }
-  .ai-tutor-thread {
-    padding-bottom: 82px;
-    min-height: calc(100dvh - 260px);
-  }
+  .ai-tutor-thread { padding-bottom: 82px; min-height: calc(100dvh - 260px); }
 
+  /* ---------- Skeleton / empty states ---------- */
   .skeleton-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 15px 2px;
-    border-bottom: 1px solid var(--ink-line);
+    display: flex; align-items: center; gap: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 15px 14px;
+    margin-bottom: 8px;
   }
   .skeleton-bar {
-    background: linear-gradient(90deg, var(--ink-2) 25%, var(--ink-line) 37%, var(--ink-2) 63%);
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 37%, var(--surface-2) 63%);
     background-size: 400% 100%;
     animation: shimmer 1.4s ease infinite;
     border-radius: 6px;
   }
   @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
 
-  .notice {
-    text-align: center;
-    padding: 48px 20px;
-    color: var(--text-dim);
+  .notice { text-align: center; padding: 54px 20px; color: var(--text-dim); }
+  .notice-dot {
+    width: 44px; height: 44px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 16px;
   }
-  .notice .seal-mono { margin: 0 auto 16px; width: 48px; height: 48px; font-size: 18px; }
   .notice p { font-size: 14px; line-height: 1.6; margin: 0; }
-  .notice .lead {
-    font-family: 'Spectral', serif;
-    font-weight: 600;
-    font-size: 17px;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
+  .notice .lead { font-weight: 700; font-size: 16.5px; color: var(--text); margin-bottom: 6px; }
 
   .paywall-card {
     text-align: center;
-    padding: 34px 22px;
-    background: var(--paper);
-    border-radius: 16px;
-    color: var(--text-ink);
+    padding: 36px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
   }
-  .paywall-card .seal-mono {
-    margin: 0 auto 16px;
-    width: 50px; height: 50px;
-    border-color: var(--gold-deep);
-    color: var(--gold-deep);
-    font-size: 18px;
-  }
-  .paywall-card h1 {
-    font-family: 'Spectral', serif;
-    font-size: 19px;
-    margin: 0 0 8px;
-  }
-  .paywall-card p {
-    font-size: 13.5px;
-    color: var(--text-ink-dim);
-    line-height: 1.6;
-    margin: 0 0 4px;
-  }
-  .paywall-note {
-    font-size: 11.5px;
-    color: var(--text-ink-dim);
-    margin-top: 14px;
-    font-family: 'IBM Plex Mono', monospace;
-  }
+  .paywall-card .notice-dot { background: var(--accent-soft); color: var(--accent); width: 48px; height: 48px; font-size: 18px; }
+  .paywall-card h1 { font-weight: 700; font-size: 18px; margin: 0 0 8px; color: var(--text); }
+  .paywall-card p { font-size: 13.5px; color: var(--text-dim); line-height: 1.6; margin: 0 0 4px; }
+  .paywall-note { font-size: 11.5px; color: var(--text-faint); margin-top: 16px; font-weight: 600; letter-spacing: 0.3px; }
 
-  .done-wrap { text-align: center; padding: 30px 10px; }
+  .done-wrap { text-align: center; padding: 34px 10px; }
   .done-seal {
-    width: 74px; height: 74px;
+    width: 68px; height: 68px;
     margin: 0 auto 18px;
     border-radius: 50%;
-    border: 2px solid var(--gold);
+    background: var(--accent-soft);
     display: flex; align-items: center; justify-content: center;
-    font-size: 30px;
-    color: var(--gold);
+    font-size: 26px;
+    color: var(--accent);
   }
-  .done-score {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 30px;
-    font-weight: 600;
-    color: var(--text);
-    margin: 0 0 6px;
-  }
-  .done-line {
-    font-size: 14px;
-    color: var(--text-dim);
-    margin: 0 0 22px;
-  }
+  .done-score { font-size: 30px; font-weight: 800; color: var(--text); margin: 0 0 6px; letter-spacing: -0.5px; }
+  .done-line { font-size: 14px; color: var(--text-dim); margin: 0 0 22px; }
 
-  .view-enter { animation: viewIn 0.22s ease; }
-  @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .view-enter { animation: viewIn 0.2s ease; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
   @media (prefers-reduced-motion: reduce) {
     .view-enter { animation: none; }
@@ -537,8 +449,8 @@ const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
-  try { tg.setHeaderColor && tg.setHeaderColor("#10182B"); } catch (e) {}
-  try { tg.setBackgroundColor && tg.setBackgroundColor("#10182B"); } catch (e) {}
+  try { tg.setHeaderColor && tg.setHeaderColor("#0B0D12"); } catch (e) {}
+  try { tg.setBackgroundColor && tg.setBackgroundColor("#0B0D12"); } catch (e) {}
 }
 
 let sessionToken = null;
@@ -625,7 +537,10 @@ async function openModule(subject, module) {
   state = { view: "loading" };
   render();
   const questions = await api(`/quiz/modules/${module.id}/questions`);
-  state = { view: "quiz", subject, module, questions, index: 0, correctCount: 0, answered: null, aiLoading: false, aiThread: [], followupLoading: false };
+  state = {
+    view: "quiz", subject, module, questions, index: 0, correctCount: 0,
+    answered: null, explainRequested: false, aiLoading: false, aiThread: [], followupLoading: false,
+  };
   render();
 }
 
@@ -640,10 +555,10 @@ function buildQuestionContext(q, a) {
   return context;
 }
 
-// Fires automatically right after every answer (correct AND wrong) -
-// no button tap needed anymore. Its result lands as the first message
-// in the same chat thread as any follow-up questions.
-async function autoExplain() {
+// Only fires when the user taps "Tushuntirishni ko'rish" - not automatic,
+// so a session of e.g. 50 questions doesn't burn 50 AI calls by itself.
+async function explainAnswer() {
+  state.explainRequested = true;
   state.aiLoading = true;
   render();
   try {
@@ -669,7 +584,7 @@ async function autoExplain() {
 }
 
 // Free-text AI tutor follow-up: user can ask their own question about the
-// current quiz question, on top of the automatic explanation above.
+// current quiz question, on top of the on-demand explanation above.
 async function askFollowup() {
   const input = document.getElementById("aiFollowupInput");
   if (!input) return;
@@ -711,10 +626,10 @@ async function answer(selected) {
     });
     state.answered = { selected, ...result };
     if (result.correct) state.correctCount++;
+    state.explainRequested = false;
     state.aiThread = [];
-    state.aiLoading = true;
+    state.aiLoading = false;
     render();
-    autoExplain(); // always explain, right or wrong - no button needed
   } catch (e) {
     if (e.message !== "paywall") console.error(e);
   }
@@ -726,6 +641,7 @@ function nextQuestion() {
   } else {
     state.index++;
     state.answered = null;
+    state.explainRequested = false;
     state.aiLoading = false;
     state.aiThread = [];
   }
@@ -753,12 +669,12 @@ function render() {
   if (state.view === "loading") {
     app.innerHTML = `
       <div class="masthead">
-        <div class="seal-mono">HT</div>
-        <div><p class="eyebrow">Milliy sertifikat</p><h1 class="brand">Huquq Testlar</h1></div>
+        <p class="eyebrow">Milliy sertifikat</p>
+        <h1 class="brand">Huquq Testlar</h1>
       </div>
       ${[1,2,3,4].map(() => `
         <div class="skeleton-row">
-          <div class="skeleton-bar" style="width:40px;height:28px;"></div>
+          <div class="skeleton-bar" style="width:34px;height:26px;"></div>
           <div style="flex:1"><div class="skeleton-bar" style="width:70%;height:14px;margin-bottom:6px;"></div><div class="skeleton-bar" style="width:40%;height:11px;"></div></div>
         </div>
       `).join("")}
@@ -770,7 +686,7 @@ function render() {
   if (state.view === "no_telegram") {
     app.innerHTML = `
       <div class="notice">
-        <div class="seal-mono">HT</div>
+        <div class="notice-dot">HT</div>
         <p class="lead">Telegram orqali oching</p>
         <p>Ushbu ilova botning menyu tugmasi orqali Telegram ichida ochilganda ishlaydi — shundagina hisobingizga kirish mumkin bo'ladi.</p>
       </div>
@@ -782,7 +698,7 @@ function render() {
   if (state.view === "paywall") {
     app.innerHTML = `
       <div class="paywall-card">
-        <div class="seal-mono">HT</div>
+        <div class="notice-dot">HT</div>
         <h1>Bugungi bepul savollar tugadi</h1>
         <p>Kuniga 3 ta bepul savol taqdim etiladi. Hisoblagich yarim tunda yangilanadi.</p>
         <button class="btn ghost" data-action="reload">Orqaga qaytish</button>
@@ -796,12 +712,12 @@ function render() {
   if (state.view === "subjects") {
     app.innerHTML = `
       <div class="masthead">
-        <div class="seal-mono">HT</div>
-        <div><p class="eyebrow">Milliy sertifikat</p><h1 class="brand">Huquq Testlar</h1></div>
+        <p class="eyebrow">Milliy sertifikat</p>
+        <h1 class="brand">Huquq Testlar</h1>
       </div>
       <div class="ai-tutor-row">
         <button class="row" data-action="open-ai-tutor">
-          <span class="tag tag-blue">AI</span>
+          <span class="tag">AI</span>
           <span class="row-body">
             <span class="row-title">AI Yordamchi bilan suhbat</span>
             <span class="row-hint">Har qanday huquqiy savolingizni bering</span>
@@ -809,8 +725,8 @@ function render() {
           <span class="chev">›</span>
         </button>
       </div>
-      <h1 class="page-title">Fanlar</h1>
-      <p class="page-sub">Boshlash uchun fanni tanlang</p>
+      <h1 class="page-title">Mavzular</h1>
+      <p class="page-sub">Boshlash uchun mavzuni tanlang</p>
       ${state.subjects.length ? `
         <div class="row-list">
           ${state.subjects.map((s, i) => `
@@ -818,7 +734,7 @@ function render() {
               <span class="tag">№${i + 1}</span>
               <span class="row-body">
                 <span class="row-title">${esc(s.title)}</span>
-                <span class="row-hint">Fan bo'yicha testlar</span>
+                <span class="row-hint">Mavzu bo'yicha testlar</span>
               </span>
               <span class="chev">›</span>
             </button>
@@ -826,9 +742,9 @@ function render() {
         </div>
       ` : `
         <div class="notice">
-          <div class="seal-mono">HT</div>
-          <p class="lead">Hozircha fanlar yo'q</p>
-          <p>Fanlar tez orada qo'shiladi. Iltimos, birozdan so'ng qayta tekshiring.</p>
+          <div class="notice-dot">HT</div>
+          <p class="lead">Hozircha mavzular yo'q</p>
+          <p>Mavzular tez orada qo'shiladi. Iltimos, birozdan so'ng qayta tekshiring.</p>
         </div>
       `}
     `;
@@ -838,7 +754,7 @@ function render() {
 
   if (state.view === "modules") {
     app.innerHTML = `
-      <span class="back" data-action="back-to-subjects">&larr; Fanlarga qaytish</span>
+      <span class="back" data-action="back-to-subjects">&larr; Mavzularga qaytish</span>
       <h1 class="page-title">${esc(state.subject.title)}</h1>
       <p class="page-sub">Modulni tanlang</p>
       ${state.modules.length ? `
@@ -856,9 +772,9 @@ function render() {
         </div>
       ` : `
         <div class="notice">
-          <div class="seal-mono">HT</div>
+          <div class="notice-dot">HT</div>
           <p class="lead">Hozircha modullar yo'q</p>
-          <p>Ushbu fan bo'yicha modullar tez orada qo'shiladi.</p>
+          <p>Ushbu mavzu bo'yicha modullar tez orada qo'shiladi.</p>
         </div>
       `}
     `;
@@ -877,7 +793,12 @@ function render() {
       return;
     }
     const a = state.answered;
-    const optKey = (k) => a ? (k === a.correct_option ? "correct" : (k === a.selected ? "wrong" : "")) : "";
+    const optClass = (k) => {
+      if (!a) return "";
+      if (k === a.correct_option) return "correct";
+      if (k === a.selected) return "wrong";
+      return "faded";
+    };
     const pct = Math.round(((state.index + (a ? 1 : 0)) / state.questions.length) * 100);
     app.innerHTML = `
       <span class="back" data-action="back-to-modules">&larr; Orqaga</span>
@@ -887,38 +808,44 @@ function render() {
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
       <p class="quiz-question">${esc(q.text)}</p>
-      <button class="option ${optKey('a')}" data-action="answer" data-option="a"><span class="option-badge">A</span>${esc(q.option_a)}</button>
-      <button class="option ${optKey('b')}" data-action="answer" data-option="b"><span class="option-badge">B</span>${esc(q.option_b)}</button>
-      <button class="option ${optKey('c')}" data-action="answer" data-option="c"><span class="option-badge">C</span>${esc(q.option_c)}</button>
-      <button class="option ${optKey('d')}" data-action="answer" data-option="d"><span class="option-badge">D</span>${esc(q.option_d)}</button>
+      <button class="option ${optClass('a')}" data-action="answer" data-option="a"><span class="option-badge">A</span>${esc(q.option_a)}</button>
+      <button class="option ${optClass('b')}" data-action="answer" data-option="b"><span class="option-badge">B</span>${esc(q.option_b)}</button>
+      <button class="option ${optClass('c')}" data-action="answer" data-option="c"><span class="option-badge">C</span>${esc(q.option_c)}</button>
+      <button class="option ${optClass('d')}" data-action="answer" data-option="d"><span class="option-badge">D</span>${esc(q.option_d)}</button>
       ${a ? `
         <div class="result-banner ${a.correct ? 'is-correct' : 'is-wrong'}">
           <span class="r-icon">${a.correct ? '✓' : '✕'}</span>
           <span>${a.correct ? "To'g'ri javob!" : "Noto'g'ri javob."}</span>
         </div>
-        <div class="ai-thread">
-          ${state.aiThread.map(t => `
-            <div class="ai-turn ${t.role}">
-              <span class="ai-avatar">${t.role === 'q' ? 'S' : 'AI'}</span>
-              <div class="ai-bubble">${esc(t.text)}</div>
-            </div>
-          `).join("")}
-          ${state.aiLoading ? `
-            <div class="ai-turn a ai-typing">
-              <span class="ai-avatar">AI</span>
-              <div class="ai-typing-bubble">
-                <span class="ai-typing-label">O'ylayapman</span>
-                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+        ${!state.explainRequested ? `
+          <button class="btn subtle" data-action="explain">
+            <span>✨</span><span>Tushuntirishni ko'rish</span>
+          </button>
+        ` : `
+          <div class="ai-thread">
+            ${state.aiThread.map(t => `
+              <div class="ai-turn ${t.role}">
+                <span class="ai-avatar">${t.role === 'q' ? 'S' : 'AI'}</span>
+                <div class="ai-bubble">${esc(t.text)}</div>
               </div>
+            `).join("")}
+            ${state.aiLoading ? `
+              <div class="ai-turn a ai-typing">
+                <span class="ai-avatar">AI</span>
+                <div class="ai-typing-bubble">
+                  <span class="ai-typing-label">O'ylayapman</span>
+                  <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+              </div>
+            ` : ""}
+          </div>
+          ${(!state.aiLoading && state.aiThread.length) ? `
+            <div class="ai-followup">
+              <input type="text" id="aiFollowupInput" placeholder="Qo'shimcha savol bering..." ${state.followupLoading ? "disabled" : ""} />
+              <button data-action="ai-followup" ${state.followupLoading ? "disabled" : ""}>${state.followupLoading ? "..." : "Yuborish"}</button>
             </div>
           ` : ""}
-        </div>
-        ${(!state.aiLoading && state.aiThread.length) ? `
-          <div class="ai-followup">
-            <input type="text" id="aiFollowupInput" placeholder="Qo'shimcha savol bering..." ${state.followupLoading ? "disabled" : ""} />
-            <button data-action="ai-followup" ${state.followupLoading ? "disabled" : ""}>${state.followupLoading ? "..." : "Yuborish"}</button>
-          </div>
-        ` : ""}
+        `}
         <button class="btn" data-action="next">Keyingisi</button>
       ` : ""}
     `;
@@ -935,7 +862,7 @@ function render() {
 
   if (state.view === "ai_tutor") {
     app.innerHTML = `
-      <span class="back" data-action="back-to-subjects">&larr; Fanlarga qaytish</span>
+      <span class="back" data-action="back-to-subjects">&larr; Mavzularga qaytish</span>
       <h1 class="page-title">AI Yordamchi</h1>
       <p class="page-sub">Har qanday huquqiy savolingizni bering</p>
       <div class="ai-thread ai-tutor-thread">
@@ -1021,6 +948,8 @@ document.getElementById("app").addEventListener("click", (e) => {
     askAiTutor();
   } else if (action === "ai-followup") {
     askFollowup();
+  } else if (action === "explain") {
+    explainAnswer();
   } else if (action === "next") {
     nextQuestion();
   } else if (action === "reload") {
