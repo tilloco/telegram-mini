@@ -277,20 +277,6 @@
   .result-banner.is-correct .r-icon { background: var(--sage); color: #fff; }
   .result-banner.is-wrong .r-icon { background: var(--maroon); color: #fff; }
 
-  .ai-btn {
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    width: 100%; padding: 12px;
-    background: transparent;
-    border: 1px solid rgba(201,162,39,0.5);
-    color: var(--gold);
-    border-radius: 11px;
-    font-size: 13.5px; font-weight: 600;
-    cursor: pointer;
-    margin-top: 6px;
-    font-family: 'Inter', sans-serif;
-  }
-  .ai-btn:active { opacity: 0.7; }
-  .ai-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
   .ai-answer {
     background: var(--ink-2);
     border: 1px solid var(--ink-line);
@@ -310,7 +296,67 @@
     color: var(--gold);
     margin-bottom: 8px;
   }
-  .ai-loading { color: var(--text-dim); font-size: 13px; }
+  .ai-loading { color: var(--text-dim); font-size: 13px; margin: 10px 0; }
+
+  .ai-thread { margin-top: 10px; }
+  .ai-turn {
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .ai-turn.q {
+    background: var(--paper);
+    color: var(--text-ink);
+    border: 1px solid var(--paper-line);
+  }
+  .ai-turn.a {
+    background: var(--ink-2);
+    border: 1px solid var(--ink-line);
+    color: var(--text);
+  }
+  .ai-turn .ai-label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--gold-deep);
+    margin-bottom: 6px;
+  }
+  .ai-turn.a .ai-label { color: var(--gold); }
+
+  .ai-followup {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .ai-followup input {
+    flex: 1;
+    padding: 12px 13px;
+    background: var(--ink-2);
+    border: 1px solid var(--ink-line);
+    border-radius: 11px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+  }
+  .ai-followup input::placeholder { color: var(--text-dim); }
+  .ai-followup button {
+    flex: none;
+    padding: 0 16px;
+    background: transparent;
+    border: 1px solid rgba(201,162,39,0.5);
+    color: var(--gold);
+    border-radius: 11px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .ai-followup button:active { opacity: 0.7; }
+  .ai-followup button:disabled { opacity: 0.4; }
 
   .skeleton-row {
     display: flex; align-items: center; gap: 12px;
@@ -469,8 +515,77 @@ async function openModule(subject, module) {
   state = { view: "loading" };
   render();
   const questions = await api(`/quiz/modules/${module.id}/questions`);
-  state = { view: "quiz", subject, module, questions, index: 0, correctCount: 0, answered: null };
+  state = { view: "quiz", subject, module, questions, index: 0, correctCount: 0, answered: null, aiAnswer: null, aiLoading: false, aiThread: [], followupLoading: false };
   render();
+}
+
+function buildQuestionContext(q, a) {
+  const opts = { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d };
+  const correctText = opts[a.correct_option];
+  const selectedText = opts[a.selected];
+  let context = `Savol: ${q.text}\nVariantlar: A) ${q.option_a} B) ${q.option_b} C) ${q.option_c} D) ${q.option_d}\nTo'g'ri javob: ${correctText}`;
+  if (!a.correct) {
+    context += `\nO'quvchi tanlagan (noto'g'ri) javob: ${selectedText}`;
+  }
+  return context;
+}
+
+// Fires automatically right after every answer (correct AND wrong) -
+// no button tap needed anymore.
+async function autoExplain() {
+  state.aiLoading = true;
+  state.aiAnswer = null;
+  render();
+  try {
+    const q = state.questions[state.index];
+    const a = state.answered;
+    const context = buildQuestionContext(q, a);
+    const question = a.correct
+      ? "Nega bu javob to'g'ri? Qisqa va aniq tushuntiring."
+      : "O'quvchi noto'g'ri javobni tanladi. Repetitor sifatida tushuntiring: 1) nega o'quvchi tanlagan javob noto'g'ri, 2) nega to'g'ri javob to'g'ri. Qisqa va aniq bo'lsin.";
+
+    const data = await api("/ai/ask", {
+      method: "POST",
+      body: JSON.stringify({ question, context }),
+    });
+    state.aiAnswer = data.answer;
+  } catch (e) {
+    if (e.message !== "paywall") state.aiAnswer = "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.";
+  }
+  state.aiLoading = false;
+  render();
+}
+
+// Free-text AI tutor follow-up: user can ask their own question about the
+// current quiz question, on top of the automatic explanation above.
+async function askFollowup() {
+  const input = document.getElementById("aiFollowupInput");
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text || state.followupLoading) return;
+  input.value = "";
+  state.aiThread.push({ role: "q", text });
+  state.followupLoading = true;
+  render();
+  try {
+    const q = state.questions[state.index];
+    const a = state.answered;
+    const context = buildQuestionContext(q, a) +
+      (state.aiAnswer ? `\nAI tushuntirishi: ${state.aiAnswer}` : "");
+    const data = await api("/ai/ask", {
+      method: "POST",
+      body: JSON.stringify({ question: text, context }),
+    });
+    state.aiThread.push({ role: "a", text: data.answer });
+  } catch (e) {
+    if (e.message !== "paywall") {
+      state.aiThread.push({ role: "a", text: "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring." });
+    }
+  }
+  state.followupLoading = false;
+  render();
+  const freshInput = document.getElementById("aiFollowupInput");
+  if (freshInput) freshInput.focus();
 }
 
 async function answer(selected) {
@@ -483,7 +598,9 @@ async function answer(selected) {
     });
     state.answered = { selected, ...result };
     if (result.correct) state.correctCount++;
+    state.aiThread = [];
     render();
+    autoExplain(); // always explain, right or wrong - no button needed
   } catch (e) {
     if (e.message !== "paywall") console.error(e);
   }
@@ -497,43 +614,8 @@ function nextQuestion() {
     state.answered = null;
     state.aiAnswer = null;
     state.aiLoading = false;
+    state.aiThread = [];
   }
-  render();
-}
-
-// ---- AI Tutor: only fires when the user taps the button, and adapts the
-// question sent to the AI depending on whether they got it right or wrong ----
-async function askAiExplain() {
-  if (!state.answered || state.aiLoading) return;
-  state.aiLoading = true;
-  state.aiAnswer = null;
-  render();
-  try {
-    const q = state.questions[state.index];
-    const opts = { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d };
-    const wasCorrect = state.answered.correct;
-    const correctText = opts[state.answered.correct_option];
-    const selectedText = opts[state.answered.selected];
-
-    let context = `Savol: ${q.text}\nVariantlar: A) ${q.option_a} B) ${q.option_b} C) ${q.option_c} D) ${q.option_d}\nTo'g'ri javob: ${correctText}`;
-    let question;
-
-    if (wasCorrect) {
-      question = "Nega bu javob to'g'ri? Qisqa va aniq tushuntiring.";
-    } else {
-      context += `\nO'quvchi tanlagan (noto'g'ri) javob: ${selectedText}`;
-      question = "O'quvchi noto'g'ri javobni tanladi. Repetitor sifatida tushuntiring: 1) nega o'quvchi tanlagan javob noto'g'ri, 2) nega to'g'ri javob to'g'ri. Qisqa va aniq bo'lsin.";
-    }
-
-    const data = await api("/ai/ask", {
-      method: "POST",
-      body: JSON.stringify({ question, context }),
-    });
-    state.aiAnswer = data.answer;
-  } catch (e) {
-    if (e.message !== "paywall") state.aiAnswer = "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.";
-  }
-  state.aiLoading = false;
   render();
 }
 
@@ -691,15 +773,33 @@ function render() {
           <span class="r-icon">${a.correct ? '✓' : '✕'}</span>
           <span>${a.correct ? "To'g'ri javob!" : "Noto'g'ri javob."}</span>
         </div>
-        <button class="ai-btn" data-action="ai-explain" ${state.aiLoading ? "disabled" : ""}>
-          <span class="dot"></span> ${a.correct ? "AI dan tushuntirish so'rash" : "Nega xato? AI dan so'rang"}
-        </button>
-        ${state.aiLoading ? `<p class="ai-loading">Javob tayyorlanmoqda...</p>` : ""}
+        ${state.aiLoading ? `<p class="ai-loading">AI tushuntirish tayyorlanmoqda...</p>` : ""}
         ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI REPETITOR</span>${esc(state.aiAnswer)}</div>` : ""}
+        ${(!state.aiLoading && state.aiAnswer) ? `
+          <div class="ai-thread">
+            ${state.aiThread.map(t => `
+              <div class="ai-turn ${t.role}">
+                <span class="ai-label">${t.role === 'q' ? "SIZ" : "AI REPETITOR"}</span>
+                ${esc(t.text)}
+              </div>
+            `).join("")}
+          </div>
+          <div class="ai-followup">
+            <input type="text" id="aiFollowupInput" placeholder="AI repetitordan qo'shimcha savol so'rang..." ${state.followupLoading ? "disabled" : ""} />
+            <button data-action="ai-followup" ${state.followupLoading ? "disabled" : ""}>${state.followupLoading ? "..." : "Yuborish"}</button>
+          </div>
+        ` : ""}
         <button class="btn" data-action="next">Keyingisi</button>
       ` : ""}
     `;
     void app.offsetWidth; app.classList.add("view-enter");
+
+    const followupInput = document.getElementById("aiFollowupInput");
+    if (followupInput) {
+      followupInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") askFollowup();
+      });
+    }
     return;
   }
 
@@ -734,8 +834,8 @@ document.getElementById("app").addEventListener("click", (e) => {
     openSubject(state.subject);
   } else if (action === "answer") {
     answer(el.dataset.option);
-  } else if (action === "ai-explain") {
-    askAiExplain();
+  } else if (action === "ai-followup") {
+    askFollowup();
   } else if (action === "next") {
     nextQuestion();
   } else if (action === "reload") {
