@@ -37,6 +37,8 @@
     --text-ink: #221D14;
     --text-ink-dim: #6E6552;
     --radius: 14px;
+    --blue: #5B9DF9;
+    --blue-deep: #3B76D6;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -153,6 +155,23 @@
     margin-top: 2px;
   }
   .chev { flex: none; color: var(--text-dim); font-size: 18px; }
+
+  .tag-blue { color: var(--blue); border-color: rgba(91,157,249,0.45); }
+  .ai-tutor-row {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--ink);
+    padding-top: 2px;
+    margin: 0 0 18px;
+  }
+  .ai-tutor-row .row {
+    background: linear-gradient(135deg, rgba(91,157,249,0.10), rgba(91,157,249,0.02));
+    border: 1px solid rgba(91,157,249,0.28);
+    border-radius: var(--radius);
+    padding: 13px 12px;
+  }
+  .ai-tutor-row .row-title { color: var(--blue); }
 
   .btn {
     display: block;
@@ -288,85 +307,114 @@
   .result-banner.is-correct .r-icon { background: var(--sage); color: #fff; }
   .result-banner.is-wrong .r-icon { background: var(--maroon); color: #fff; }
 
-  .ai-answer {
-    background: var(--ink-2);
-    border: 1px solid var(--ink-line);
-    border-radius: var(--radius);
-    padding: 14px;
-    margin-top: 10px;
-    font-size: 13.5px;
-    line-height: 1.65;
-    color: var(--text);
-    white-space: pre-wrap;
+  .ai-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
   }
-  .ai-answer .ai-label {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 1px;
-    color: var(--gold);
-    margin-bottom: 8px;
-  }
-  .ai-loading { color: var(--text-dim); font-size: 13px; margin: 10px 0; }
-
-  .ai-thread { margin-top: 10px; }
   .ai-turn {
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 88%;
+    animation: bubbleIn 0.24s ease;
+  }
+  .ai-turn.q { align-self: flex-end; flex-direction: row-reverse; }
+  .ai-turn.a { align-self: flex-start; }
+  .ai-avatar {
+    flex: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+  }
+  .ai-turn.q .ai-avatar { background: var(--blue); color: #fff; }
+  .ai-turn.a .ai-avatar { background: var(--ink-2); border: 1px solid var(--blue); color: var(--blue); }
+  .ai-bubble {
+    padding: 11px 14px;
     font-size: 13.5px;
-    line-height: 1.6;
+    line-height: 1.62;
     white-space: pre-wrap;
+    border-radius: 16px;
   }
-  .ai-turn.q {
-    background: var(--paper);
-    color: var(--text-ink);
-    border: 1px solid var(--paper-line);
+  .ai-turn.q .ai-bubble {
+    background: linear-gradient(135deg, var(--blue), var(--blue-deep));
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
   }
-  .ai-turn.a {
+  .ai-turn.a .ai-bubble {
     background: var(--ink-2);
     border: 1px solid var(--ink-line);
     color: var(--text);
+    border-radius: 16px 16px 16px 4px;
   }
-  .ai-turn .ai-label {
-    display: block;
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .ai-typing { align-self: flex-start; display: flex; align-items: flex-end; gap: 8px; }
+  .ai-typing-bubble {
+    background: var(--ink-2);
+    border: 1px solid var(--ink-line);
+    border-radius: 16px 16px 16px 4px;
+    padding: 11px 15px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .ai-typing-bubble .ai-typing-label {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--gold-deep);
-    margin-bottom: 6px;
+    font-size: 11.5px;
+    color: var(--text-dim);
   }
-  .ai-turn.a .ai-label { color: var(--gold); }
+  .ai-typing-bubble .dots { display: flex; gap: 3px; }
+  .ai-typing-bubble .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--blue);
+    animation: dotBounce 1.1s infinite ease-in-out;
+  }
+  .ai-typing-bubble .dot:nth-child(2) { animation-delay: 0.15s; }
+  .ai-typing-bubble .dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dotBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
 
   .ai-followup {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 12px;
   }
   .ai-followup input {
     flex: 1;
     padding: 12px 13px;
     background: var(--ink-2);
     border: 1px solid var(--ink-line);
-    border-radius: 11px;
+    border-radius: 20px;
     color: var(--text);
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
   }
+  .ai-followup input:focus { outline: none; border-color: rgba(91,157,249,0.6); }
   .ai-followup input::placeholder { color: var(--text-dim); }
   .ai-followup button {
     flex: none;
-    padding: 0 16px;
-    background: transparent;
-    border: 1px solid rgba(201,162,39,0.5);
-    color: var(--gold);
-    border-radius: 11px;
+    padding: 0 18px;
+    background: var(--blue);
+    border: none;
+    color: #fff;
+    border-radius: 20px;
     font-family: 'Inter', sans-serif;
     font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
   }
-  .ai-followup button:active { opacity: 0.7; }
+  .ai-followup button:active { opacity: 0.75; }
   .ai-followup button:disabled { opacity: 0.4; }
 
   .skeleton-row {
@@ -517,7 +565,7 @@ async function loadSubjects() {
 }
 
 function openAiTutor() {
-  state = { view: "ai_tutor", aiTutorThread: [], aiTutorLoading: false };
+  state = { view: "ai_tutor", subjects: cachedSubjects, aiTutorThread: [], aiTutorLoading: false };
   render();
 }
 
@@ -562,7 +610,7 @@ async function openModule(subject, module) {
   state = { view: "loading" };
   render();
   const questions = await api(`/quiz/modules/${module.id}/questions`);
-  state = { view: "quiz", subject, module, questions, index: 0, correctCount: 0, answered: null, aiAnswer: null, aiLoading: false, aiThread: [], followupLoading: false };
+  state = { view: "quiz", subject, module, questions, index: 0, correctCount: 0, answered: null, aiLoading: false, aiThread: [], followupLoading: false };
   render();
 }
 
@@ -578,10 +626,10 @@ function buildQuestionContext(q, a) {
 }
 
 // Fires automatically right after every answer (correct AND wrong) -
-// no button tap needed anymore.
+// no button tap needed anymore. Its result lands as the first message
+// in the same chat thread as any follow-up questions.
 async function autoExplain() {
   state.aiLoading = true;
-  state.aiAnswer = null;
   render();
   try {
     const q = state.questions[state.index];
@@ -595,9 +643,11 @@ async function autoExplain() {
       method: "POST",
       body: JSON.stringify({ question, context }),
     });
-    state.aiAnswer = data.answer;
+    state.aiThread.push({ role: "a", text: data.answer });
   } catch (e) {
-    if (e.message !== "paywall") state.aiAnswer = "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.";
+    if (e.message !== "paywall") {
+      state.aiThread.push({ role: "a", text: "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring." });
+    }
   }
   state.aiLoading = false;
   render();
@@ -617,8 +667,9 @@ async function askFollowup() {
   try {
     const q = state.questions[state.index];
     const a = state.answered;
+    const lastAnswer = [...state.aiThread].reverse().find(t => t.role === "a" && t.text !== undefined);
     const context = buildQuestionContext(q, a) +
-      (state.aiAnswer ? `\nAI tushuntirishi: ${state.aiAnswer}` : "");
+      (lastAnswer ? `\nAI tushuntirishi: ${lastAnswer.text}` : "");
     const data = await api("/ai/ask", {
       method: "POST",
       body: JSON.stringify({ question: text, context }),
@@ -646,6 +697,7 @@ async function answer(selected) {
     state.answered = { selected, ...result };
     if (result.correct) state.correctCount++;
     state.aiThread = [];
+    state.aiLoading = true;
     render();
     autoExplain(); // always explain, right or wrong - no button needed
   } catch (e) {
@@ -659,7 +711,6 @@ function nextQuestion() {
   } else {
     state.index++;
     state.answered = null;
-    state.aiAnswer = null;
     state.aiLoading = false;
     state.aiThread = [];
   }
@@ -733,11 +784,11 @@ function render() {
         <div class="seal-mono">HT</div>
         <div><p class="eyebrow">Milliy sertifikat</p><h1 class="brand">Huquq Testlar</h1></div>
       </div>
-      <div class="row-list" style="margin-bottom: 22px;">
+      <div class="ai-tutor-row">
         <button class="row" data-action="open-ai-tutor">
-          <span class="tag">AI</span>
+          <span class="tag tag-blue">AI</span>
           <span class="row-body">
-            <span class="row-title">AI Repetitordan so'rang</span>
+            <span class="row-title">AI Yordamchi bilan suhbat</span>
             <span class="row-hint">Har qanday huquqiy savolingizni bering</span>
           </span>
           <span class="chev">›</span>
@@ -830,19 +881,26 @@ function render() {
           <span class="r-icon">${a.correct ? '✓' : '✕'}</span>
           <span>${a.correct ? "To'g'ri javob!" : "Noto'g'ri javob."}</span>
         </div>
-        ${state.aiLoading ? `<p class="ai-loading">AI tushuntirish tayyorlanmoqda...</p>` : ""}
-        ${state.aiAnswer ? `<div class="ai-answer"><span class="ai-label">AI REPETITOR</span>${esc(state.aiAnswer)}</div>` : ""}
-        ${(!state.aiLoading && state.aiAnswer) ? `
-          <div class="ai-thread">
-            ${state.aiThread.map(t => `
-              <div class="ai-turn ${t.role}">
-                <span class="ai-label">${t.role === 'q' ? "SIZ" : "AI REPETITOR"}</span>
-                ${esc(t.text)}
+        <div class="ai-thread">
+          ${state.aiThread.map(t => `
+            <div class="ai-turn ${t.role}">
+              <span class="ai-avatar">${t.role === 'q' ? 'S' : 'AI'}</span>
+              <div class="ai-bubble">${esc(t.text)}</div>
+            </div>
+          `).join("")}
+          ${state.aiLoading ? `
+            <div class="ai-turn a ai-typing">
+              <span class="ai-avatar">AI</span>
+              <div class="ai-typing-bubble">
+                <span class="ai-typing-label">O'ylayapman</span>
+                <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
               </div>
-            `).join("")}
-          </div>
+            </div>
+          ` : ""}
+        </div>
+        ${(!state.aiLoading && state.aiThread.length) ? `
           <div class="ai-followup">
-            <input type="text" id="aiFollowupInput" placeholder="AI repetitordan qo'shimcha savol so'rang..." ${state.followupLoading ? "disabled" : ""} />
+            <input type="text" id="aiFollowupInput" placeholder="Qo'shimcha savol bering..." ${state.followupLoading ? "disabled" : ""} />
             <button data-action="ai-followup" ${state.followupLoading ? "disabled" : ""}>${state.followupLoading ? "..." : "Yuborish"}</button>
           </div>
         ` : ""}
@@ -863,16 +921,30 @@ function render() {
   if (state.view === "ai_tutor") {
     app.innerHTML = `
       <span class="back" data-action="back-to-subjects">&larr; Fanlarga qaytish</span>
-      <h1 class="page-title">AI Repetitor</h1>
+      <h1 class="page-title">AI Yordamchi</h1>
       <p class="page-sub">Har qanday huquqiy savolingizni bering</p>
       <div class="ai-thread">
+        ${state.aiTutorThread.length === 0 && !state.aiTutorLoading ? `
+          <div class="ai-turn a">
+            <span class="ai-avatar">AI</span>
+            <div class="ai-bubble">Salom! Konstitutsiyaviy huquq, Fuqarolik huquqi va boshqa fanlar bo'yicha savolingizni yozing — birga ko'rib chiqamiz.</div>
+          </div>
+        ` : ""}
         ${state.aiTutorThread.map(t => `
           <div class="ai-turn ${t.role}">
-            <span class="ai-label">${t.role === 'q' ? "SIZ" : "AI REPETITOR"}</span>
-            ${esc(t.text)}
+            <span class="ai-avatar">${t.role === 'q' ? 'S' : 'AI'}</span>
+            <div class="ai-bubble">${esc(t.text)}</div>
           </div>
         `).join("")}
-        ${state.aiTutorLoading ? `<p class="ai-loading">Javob tayyorlanmoqda...</p>` : ""}
+        ${state.aiTutorLoading ? `
+          <div class="ai-turn a ai-typing">
+            <span class="ai-avatar">AI</span>
+            <div class="ai-typing-bubble">
+              <span class="ai-typing-label">O'ylayapman</span>
+              <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </div>
+        ` : ""}
       </div>
       <div class="ai-followup">
         <input type="text" id="aiTutorInput" placeholder="Savolingizni yozing..." ${state.aiTutorLoading ? "disabled" : ""} />
