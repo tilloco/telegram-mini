@@ -417,6 +417,21 @@
   .ai-followup button:active { opacity: 0.75; }
   .ai-followup button:disabled { opacity: 0.4; }
 
+  .ai-tutor-composer {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    width: calc(100% - 32px);
+    max-width: 448px;
+    z-index: 8;
+  }
+  .ai-tutor-composer .ai-followup { margin-top: 0; }
+  .ai-tutor-thread {
+    padding-bottom: 82px;
+    min-height: calc(100dvh - 260px);
+  }
+
   .skeleton-row {
     display: flex; align-items: center; gap: 12px;
     padding: 15px 2px;
@@ -923,7 +938,7 @@ function render() {
       <span class="back" data-action="back-to-subjects">&larr; Fanlarga qaytish</span>
       <h1 class="page-title">AI Yordamchi</h1>
       <p class="page-sub">Har qanday huquqiy savolingizni bering</p>
-      <div class="ai-thread">
+      <div class="ai-thread ai-tutor-thread">
         ${state.aiTutorThread.length === 0 && !state.aiTutorLoading ? `
           <div class="ai-turn a">
             <span class="ai-avatar">AI</span>
@@ -946,9 +961,11 @@ function render() {
           </div>
         ` : ""}
       </div>
-      <div class="ai-followup">
-        <input type="text" id="aiTutorInput" placeholder="Savolingizni yozing..." ${state.aiTutorLoading ? "disabled" : ""} />
-        <button data-action="ai-tutor-send" ${state.aiTutorLoading ? "disabled" : ""}>${state.aiTutorLoading ? "..." : "Yuborish"}</button>
+      <div class="ai-tutor-composer">
+        <div class="ai-followup">
+          <input type="text" id="aiTutorInput" placeholder="Savolingizni yozing..." ${state.aiTutorLoading ? "disabled" : ""} />
+          <button data-action="ai-tutor-send" ${state.aiTutorLoading ? "disabled" : ""}>${state.aiTutorLoading ? "..." : "Yuborish"}</button>
+        </div>
       </div>
     `;
     void app.offsetWidth; app.classList.add("view-enter");
